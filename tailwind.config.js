@@ -1,9 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+module.exports = {
+  content: ['./app/**/*.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
+  presets: [require('nativewind/preset')],
   theme: {
     extend: {
       colors: {
@@ -19,19 +17,11 @@ export default {
           800: '#5b21b6',
           900: '#4c1d95',
         },
-      },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-      },
-      boxShadow: {
-        'card': '0 2px 16px 0 rgba(124, 58, 237, 0.08)',
-        'card-hover': '0 4px 24px 0 rgba(124, 58, 237, 0.14)',
-      },
-      borderRadius: {
-        '2xl': '1rem',
-        '3xl': '1.5rem',
+        surface: '#ffffff',
+        muted: '#f8fafc',
+        border: '#e2e8f0',
       },
     },
   },
   plugins: [],
-}
+};

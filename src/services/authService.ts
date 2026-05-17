@@ -1,6 +1,6 @@
-import { supabase } from '../lib/supabase'
-import { apiGet } from '../lib/apiClient'
-import type { User, LoginPayload, RegisterPayload } from '../types'
+import { supabase } from '@/lib/supabase'
+import { apiGet } from '@/lib/apiClient'
+import type { User, LoginPayload, RegisterPayload } from '@/types'
 
 export async function login(payload: LoginPayload): Promise<User> {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -20,10 +20,6 @@ export async function register(payload: RegisterPayload): Promise<User> {
   })
   if (error) throw new Error(translateError(error.message))
   if (!data.user) throw new Error('Cadastro não foi concluído.')
-
-  // Build the user object directly from Supabase — no backend call needed here.
-  // The DB trigger (handle_new_user) creates the profile row automatically.
-  // The backend /api/me will return the full profile once the user navigates the app.
   return {
     id: data.user.id,
     name: payload.name.trim(),
@@ -46,8 +42,6 @@ export async function getSessionUser(): Promise<User | null> {
   try {
     return await fetchMe()
   } catch (err) {
-    // Backend unreachable on startup — fall back to Supabase auth data
-    console.warn('[auth] Backend unavailable, using cached Supabase session:', (err as Error).message)
     const u = session.user
     return {
       id: u.id,
@@ -60,13 +54,13 @@ export async function getSessionUser(): Promise<User | null> {
 
 function translateError(msg: string): string {
   const map: Record<string, string> = {
-    'Invalid login credentials': 'E-mail ou senha inválidos.',
-    'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
-    'User already registered': 'Este e-mail já está em uso.',
+    'Invalid login credentials':               'E-mail ou senha inválidos.',
+    'Email not confirmed':                      'Confirme seu e-mail antes de entrar.',
+    'User already registered':                  'Este e-mail já está em uso.',
     'Password should be at least 6 characters': 'A senha deve ter pelo menos 6 caracteres.',
-    'signup is disabled': 'Cadastro desabilitado no momento.',
-    'invalid email': 'E-mail inválido.',
-    'Email rate limit exceeded': 'Muitas tentativas. Aguarde alguns minutos.',
+    'signup is disabled':                       'Cadastro desabilitado no momento.',
+    'invalid email':                            'E-mail inválido.',
+    'Email rate limit exceeded':                'Muitas tentativas. Aguarde alguns minutos.',
   }
   for (const [key, value] of Object.entries(map)) {
     if (msg.toLowerCase().includes(key.toLowerCase())) return value

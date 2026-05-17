@@ -1,31 +1,28 @@
-import React from 'react'
+import { View } from 'react-native'
+import { shadows } from '@/theme'
+
+type Padding = 'none' | 'sm' | 'md' | 'lg'
 
 interface CardProps {
   children: React.ReactNode
+  padding?: Padding
   className?: string
-  onClick?: () => void
-  padding?: 'none' | 'sm' | 'md' | 'lg'
 }
 
-const paddingClasses = {
+const paddingClasses: Record<Padding, string> = {
   none: '',
-  sm: 'p-3',
-  md: 'p-4',
-  lg: 'p-6',
+  sm:   'p-3',
+  md:   'p-4',
+  lg:   'p-5',
 }
 
-export function Card({ children, className = '', onClick, padding = 'md' }: CardProps) {
+export function Card({ children, padding = 'md', className = '' }: CardProps) {
   return (
-    <div
-      onClick={onClick}
-      className={[
-        'bg-white rounded-3xl shadow-card',
-        paddingClasses[padding],
-        onClick ? 'cursor-pointer hover:shadow-card-hover transition-shadow duration-200' : '',
-        className,
-      ].join(' ')}
+    <View
+      className={['bg-white rounded-3xl', paddingClasses[padding], className].join(' ')}
+      style={shadows.md}
     >
       {children}
-    </div>
+    </View>
   )
 }

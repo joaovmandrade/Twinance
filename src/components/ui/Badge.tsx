@@ -1,28 +1,19 @@
-import React from 'react'
+import { View, Text } from 'react-native'
 
 interface BadgeProps {
-  children: React.ReactNode
-  color?: 'purple' | 'green' | 'amber' | 'red' | 'blue' | 'gray'
+  label: string
+  color?: string
+  emoji?: string
 }
 
-const colorClasses = {
-  purple: 'bg-primary-100 text-primary-700',
-  green:  'bg-emerald-100 text-emerald-700',
-  amber:  'bg-amber-100 text-amber-700',
-  red:    'bg-red-100 text-red-700',
-  blue:   'bg-blue-100 text-blue-700',
-  gray:   'bg-gray-100 text-gray-600',
-}
-
-export function Badge({ children, color = 'gray' }: BadgeProps) {
+export function Badge({ label, color = '#7c3aed', emoji }: BadgeProps) {
   return (
-    <span
-      className={[
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold',
-        colorClasses[color],
-      ].join(' ')}
+    <View
+      className="flex-row items-center gap-1 rounded-full px-2.5 py-1"
+      style={{ backgroundColor: color + '22' }}
     >
-      {children}
-    </span>
+      {emoji && <Text className="text-xs">{emoji}</Text>}
+      <Text className="text-xs font-semibold" style={{ color }}>{label}</Text>
+    </View>
   )
 }
