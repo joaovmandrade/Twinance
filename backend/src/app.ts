@@ -1,33 +1,23 @@
-import express, { Request, Response, NextFunction } from 'express'
+import express from 'express'
 import cors from 'cors'
-import 'dotenv/config'
+import helmet from 'helmet'
+import morgan from 'morgan'
+import { corsOptions } from './config/cors'
+import { env } from './config/env'
 import routes from './routes'
 import { errorHandler } from './middleware/errorHandler'
+import { apiLimiter } from './middleware/rateLimiter'
 
 const app = express()
 
-// ── CORS ─────────────────────────────────────────────────────
-const origin = process.env.FRONTEND_URL || 'http://localhost:5173'
-app.use(cors({
-  origin,
-  credentials: true,
-  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}))
+app.use(helmet())
+app.use(cors(corsOptions))
+app.use(express.json({ limit: '10kb' }))
+app.use(morgan(env.isDev ? 'dev' : 'combined'))
 
-// ── Body parser ───────────────────────────────────────────────
-app.use(express.json())
-
-// ── Request logger ────────────────────────────────────────────
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`)
-  next()
-})
-
-// ── Routes ────────────────────────────────────────────────────
+app.use('/api', apiLimiter)
 app.use('/api', routes)
 
-// ── Error handler ─────────────────────────────────────────────
 app.use(errorHandler)
 
 export default app
