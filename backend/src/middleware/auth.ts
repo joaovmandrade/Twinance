@@ -1,9 +1,9 @@
-import { Response, NextFunction } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { supabase } from '../services/supabase'
 import { AuthRequest } from '../types'
 
 export async function authMiddleware(
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
@@ -18,6 +18,7 @@ export async function authMiddleware(
     res.status(401).json({ message: 'Invalid or expired token' })
     return
   }
-  req.userId = data.user.id
+  const authReq = req as AuthRequest
+  authReq.userId = data.user.id
   next()
 }

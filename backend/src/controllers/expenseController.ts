@@ -3,6 +3,20 @@ import { v4 as uuidv4 } from 'uuid'
 import { supabase } from '../services/supabase'
 import { AuthRequest } from '../types'
 
+interface ExpenseRow {
+  id: string
+  user_id: string
+  couple_id: string
+  amount: number
+  description: string
+  is_recurring: boolean
+  date: string
+  created_at: string
+  // Supabase returns joined FK rows as single object at runtime;
+  // cast via unknown to bridge the generated array inference
+  categories: { slug: string } | null
+}
+
 async function getUserCoupleId(userId: string): Promise<string | null> {
   const { data } = await supabase
     .from('couple_members')
@@ -31,7 +45,7 @@ export async function getExpenses(req: AuthRequest, res: Response): Promise<void
     return
   }
 
-  const expenses = (data ?? []).map((e: any) => ({
+  const expenses = ((data ?? []) as unknown as ExpenseRow[]).map((e) => ({
     id: e.id,
     userId: e.user_id,
     coupleId: e.couple_id,
@@ -106,7 +120,7 @@ export async function createExpense(req: AuthRequest, res: Response): Promise<vo
     userId: expense.user_id,
     coupleId: expense.couple_id,
     amount: Number(expense.amount),
-    category: (expense as any).categories?.slug ?? 'other',
+    category: (expense as unknown as ExpenseRow).categories?.slug ?? 'other',
     description: expense.description,
     recurring: expense.is_recurring,
     date: expense.date,
@@ -205,7 +219,7 @@ export async function updateExpense(req: AuthRequest, res: Response): Promise<vo
     userId: updated.user_id,
     coupleId: updated.couple_id,
     amount: Number(updated.amount),
-    category: (updated as any).categories?.slug ?? 'other',
+    category: (updated as unknown as ExpenseRow).categories?.slug ?? 'other',
     description: updated.description,
     recurring: updated.is_recurring,
     date: updated.date,
