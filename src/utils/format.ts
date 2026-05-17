@@ -18,3 +18,11 @@ export function getInitials(name: string): string {
     .join('')
     .toUpperCase()
 }
+
+export function todayISO(): string {
+  return new Date().toISOString().split('T')[0]
+}
+
+export function parseAmount(raw: string): number {
+  return parseFloat(raw.replace(',', '.'))
+}

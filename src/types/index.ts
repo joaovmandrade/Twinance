@@ -44,17 +44,6 @@ export interface CategoryMeta {
   emoji: string
 }
 
-export interface AuthState {
-  user: User | null
-  isAuthenticated: boolean
-  isLoading: boolean
-}
-
-export interface CoupleState {
-  couple: Couple | null
-  partner: User | null
-}
-
 export type LoginPayload = { email: string; password: string }
 export type RegisterPayload = { name: string; email: string; password: string }
 
@@ -64,4 +53,9 @@ export interface ExpenseFormValues {
   description: string
   recurring: boolean
   date: string
+}
+
+export interface CoupleResponse {
+  couple: Couple
+  partner: User | null
 }

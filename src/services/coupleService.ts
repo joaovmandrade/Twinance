@@ -1,10 +1,5 @@
-import { apiGet, apiPost } from '../lib/apiClient'
-import type { Couple, User } from '../types'
-
-export interface CoupleResponse {
-  couple: Couple
-  partner: User | null
-}
+import { apiGet, apiPost } from '@/lib/apiClient'
+import type { CoupleResponse } from '@/types'
 
 export async function getMyCouple(): Promise<CoupleResponse> {
   return apiGet<CoupleResponse>('/api/couples/mine')

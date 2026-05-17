@@ -1,58 +1,74 @@
-import React from 'react'
+import { Pressable, Text, ActivityIndicator, View } from 'react-native'
+import * as Haptics from 'expo-haptics'
+import { colors } from '@/theme'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
-type Size = 'sm' | 'md' | 'lg'
+type Size    = 'sm' | 'md' | 'lg'
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps {
+  onPress: () => void
+  label: string
   variant?: Variant
   size?: Size
   loading?: boolean
+  disabled?: boolean
   fullWidth?: boolean
+  icon?: React.ReactNode
 }
 
-const variantClasses: Record<Variant, string> = {
-  primary:
-    'bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white shadow-sm',
-  secondary:
-    'bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200',
-  ghost:
-    'hover:bg-gray-100 text-gray-700',
-  danger:
-    'bg-red-500 hover:bg-red-600 text-white shadow-sm',
+const variantStyles: Record<Variant, { container: string; text: string }> = {
+  primary:   { container: 'bg-primary-600 active:bg-primary-700', text: 'text-white font-bold' },
+  secondary: { container: 'bg-primary-100 active:bg-primary-200', text: 'text-primary-700 font-bold' },
+  ghost:     { container: 'bg-transparent active:bg-gray-100', text: 'text-gray-700 font-semibold' },
+  danger:    { container: 'bg-red-500 active:bg-red-600', text: 'text-white font-bold' },
 }
 
-const sizeClasses: Record<Size, string> = {
-  sm: 'px-3 py-1.5 text-sm rounded-xl',
-  md: 'px-5 py-2.5 text-sm rounded-2xl',
-  lg: 'px-6 py-3.5 text-base rounded-2xl',
+const sizeStyles: Record<Size, { container: string; text: string }> = {
+  sm: { container: 'px-4 py-2.5 rounded-xl', text: 'text-sm' },
+  md: { container: 'px-5 py-3.5 rounded-2xl', text: 'text-base' },
+  lg: { container: 'px-6 py-4 rounded-2xl',   text: 'text-lg' },
 }
 
 export function Button({
+  onPress,
+  label,
   variant = 'primary',
   size = 'md',
   loading = false,
+  disabled = false,
   fullWidth = false,
-  disabled,
-  children,
-  className = '',
-  ...rest
+  icon,
 }: ButtonProps) {
+  const { container, text } = variantStyles[variant]
+  const { container: sc, text: st } = sizeStyles[size]
+  const isDisabled = disabled || loading
+
   return (
-    <button
-      disabled={disabled || loading}
+    <Pressable
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+        onPress()
+      }}
+      disabled={isDisabled}
       className={[
-        'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
-        variantClasses[variant],
-        sizeClasses[size],
-        fullWidth ? 'w-full' : '',
-        className,
-      ].join(' ')}
-      {...rest}
+        'flex-row items-center justify-center gap-2',
+        container,
+        sc,
+        fullWidth && 'w-full',
+        isDisabled && 'opacity-50',
+      ].filter(Boolean).join(' ')}
     >
-      {loading && (
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      {loading ? (
+        <ActivityIndicator
+          size="small"
+          color={variant === 'primary' || variant === 'danger' ? colors.white : colors.primary[600]}
+        />
+      ) : (
+        <>
+          {icon && <View>{icon}</View>}
+          <Text className={[text, st].join(' ')}>{label}</Text>
+        </>
       )}
-      {children}
-    </button>
+    </Pressable>
   )
 }

@@ -1,39 +1,35 @@
-import React from 'react'
+import { View, Text, TextInput, TextInputProps } from 'react-native'
+import { colors } from '@/theme'
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends TextInputProps {
   label?: string
   error?: string
   leftIcon?: React.ReactNode
+  rightIcon?: React.ReactNode
 }
 
-export function Input({ label, error, leftIcon, className = '', id, ...rest }: InputProps) {
-  const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-')
+export function Input({ label, error, leftIcon, rightIcon, ...props }: InputProps) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <View className="gap-1.5">
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
-          {label}
-        </label>
+        <Text className="text-sm font-semibold text-gray-700">{label}</Text>
       )}
-      <div className="relative">
-        {leftIcon && (
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-            {leftIcon}
-          </span>
-        )}
-        <input
-          id={inputId}
-          className={[
-            'w-full rounded-2xl border bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-all duration-150',
-            'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
-            error ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300',
-            leftIcon ? 'pl-10' : '',
-            className,
-          ].join(' ')}
-          {...rest}
+      <View
+        className={[
+          'flex-row items-center bg-gray-50 rounded-2xl border px-4 gap-3',
+          error ? 'border-red-400' : 'border-gray-200',
+        ].join(' ')}
+      >
+        {leftIcon && <View>{leftIcon}</View>}
+        <TextInput
+          className="flex-1 py-3.5 text-base text-gray-900"
+          placeholderTextColor={colors.gray[400]}
+          style={{ fontFamily: 'Inter_400Regular' }}
+          {...props}
         />
-      </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
-    </div>
+        {rightIcon && <View>{rightIcon}</View>}
+      </View>
+      {error && <Text className="text-xs text-red-500 ml-1">{error}</Text>}
+    </View>
   )
 }
