@@ -10,7 +10,7 @@ import { useCoupleStore } from '@/store/coupleStore'
 import { useExpenses, useDeleteExpense } from '@/hooks/useExpenses'
 import { CATEGORY_META, EXPENSE_CATEGORIES } from '@/constants/categories'
 import { formatCurrency } from '@/utils/format'
-import { Input, Badge, LoadingSpinner } from '@/components/ui'
+import { Input, Badge, Skeleton } from '@/components/ui'
 import { ExpenseCard } from '@/features/expenses/ExpenseCard'
 import { AddExpenseSheet } from '@/features/expenses/AddExpenseSheet'
 import { colors } from '@/theme'
@@ -174,7 +174,9 @@ export default function ExpensesScreen() {
       </View>
 
       {isLoading ? (
-        <LoadingSpinner />
+        <View style={{ paddingHorizontal: 20, paddingTop: 4, gap: 10 }}>
+          {[0, 1, 2, 3, 4, 5].map((i) => <Skeleton key={i} height={72} borderRadius={16} />)}
+        </View>
       ) : filtered.length > 0 ? (
         <FlashList
           data={filtered}
