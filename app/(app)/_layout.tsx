@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router'
-import { LayoutDashboard, Receipt, UserCircle } from 'lucide-react-native'
+import { LayoutDashboard, Receipt, CalendarDays, UserCircle } from 'lucide-react-native'
 import { colors } from '@/theme'
 
 export default function AppLayout() {
@@ -36,6 +36,13 @@ export default function AppLayout() {
         options={{
           title: 'Gastos',
           tabBarIcon: ({ color, size }) => <Receipt size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: 'Calendário',
+          tabBarIcon: ({ color, size }) => <CalendarDays size={size} color={color} />,
         }}
       />
       <Tabs.Screen
