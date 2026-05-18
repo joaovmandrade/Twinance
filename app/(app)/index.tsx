@@ -12,7 +12,7 @@ import { useExpenses } from '@/hooks/useExpenses'
 import { getTotalByUser, getTotalByCategory } from '@/services/expenseService'
 import { CATEGORY_META } from '@/constants/categories'
 import { formatCurrency } from '@/utils/format'
-import { Avatar, Card, LoadingSpinner } from '@/components/ui'
+import { Avatar, Card, Skeleton } from '@/components/ui'
 import { ExpenseCard } from '@/features/expenses/ExpenseCard'
 import { AddExpenseSheet } from '@/features/expenses/AddExpenseSheet'
 import { colors } from '@/theme'
@@ -54,7 +54,27 @@ export default function DashboardScreen() {
 
   const recentExpenses = expenses.slice(0, 5)
 
-  if (isLoading) return <LoadingSpinner fullScreen />
+  if (isLoading) return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }} edges={['top']}>
+      <View style={{ padding: 20, gap: 16 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ gap: 6 }}>
+            <Skeleton width={60} height={12} />
+            <Skeleton width={130} height={28} borderRadius={6} />
+          </View>
+          <Skeleton width={44} height={44} borderRadius={22} />
+        </View>
+        <Skeleton height={152} borderRadius={28} />
+        <Skeleton height={64} borderRadius={16} />
+        <Skeleton height={180} borderRadius={16} />
+        <Skeleton height={200} borderRadius={16} />
+        <View style={{ gap: 8 }}>
+          <Skeleton width={120} height={14} />
+          {[0, 1, 2].map((i) => <Skeleton key={i} height={68} borderRadius={16} />)}
+        </View>
+      </View>
+    </SafeAreaView>
+  )
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>

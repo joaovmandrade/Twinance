@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: twinance-backend
+    runtime: node
+    rootDir: backend
+    # --include=dev ensures @types/node and typescript are installed
+    # even when NODE_ENV=production (Render's default)
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false

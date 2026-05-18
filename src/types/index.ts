@@ -59,3 +59,42 @@ export interface CoupleResponse {
   couple: Couple
   partner: User | null
 }
+
+// ── Calendar Events ───────────────────────────────────────────
+
+export type EventType = 'bill' | 'date' | 'travel' | 'goal' | 'appointment' | 'custom'
+
+export interface CalendarEvent {
+  id: string
+  coupleId: string
+  createdBy: string
+  title: string
+  description: string
+  type: EventType
+  startDate: string
+  endDate: string | null
+  allDay: boolean
+  location: string
+  color: string
+  amount: number | null
+  isRecurring: boolean
+  reminderMinutes: number | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CalendarEventFormValues {
+  title: string
+  description: string
+  type: EventType
+  startDate: string
+  startTime: string
+  endDate: string
+  endTime: string
+  allDay: boolean
+  location: string
+  color: string
+  amount: string
+  isRecurring: boolean
+  reminderMinutes: number | null
+}

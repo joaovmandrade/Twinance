@@ -89,3 +89,80 @@ CREATE INDEX IF NOT EXISTS idx_couple_members_couple_id ON public.couple_members
 CREATE INDEX IF NOT EXISTS idx_expenses_couple_id       ON public.expenses (couple_id);
 CREATE INDEX IF NOT EXISTS idx_expenses_user_id         ON public.expenses (user_id);
 CREATE INDEX IF NOT EXISTS idx_expenses_date            ON public.expenses (date DESC);
+
+-- ── Events ────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.events (
+  id               uuid          DEFAULT gen_random_uuid() PRIMARY KEY,
+  couple_id        uuid          REFERENCES public.couples    ON DELETE CASCADE NOT NULL,
+  created_by       uuid          REFERENCES auth.users        ON DELETE CASCADE NOT NULL,
+  title            text          NOT NULL,
+  description      text          NOT NULL DEFAULT '',
+  type             text          NOT NULL DEFAULT 'custom',
+  start_date       timestamptz   NOT NULL,
+  end_date         timestamptz,
+  all_day          boolean       NOT NULL DEFAULT false,
+  location         text          NOT NULL DEFAULT '',
+  color            text          NOT NULL DEFAULT '#8b5cf6',
+  amount           numeric(12,2),
+  is_recurring     boolean       NOT NULL DEFAULT false,
+  reminder_minutes integer,
+  created_at       timestamptz   DEFAULT now(),
+  updated_at       timestamptz   DEFAULT now(),
+  CONSTRAINT events_type_check CHECK (
+    type IN ('bill', 'date', 'travel', 'goal', 'appointment', 'custom')
+  )
+);
+
+-- Auto-update updated_at on every row change
+CREATE OR REPLACE FUNCTION public.handle_event_updated_at()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_event_updated ON public.events;
+CREATE TRIGGER on_event_updated
+  BEFORE UPDATE ON public.events
+  FOR EACH ROW EXECUTE FUNCTION public.handle_event_updated_at();
+
+-- Indexes for common query patterns
+CREATE INDEX IF NOT EXISTS idx_events_couple_id  ON public.events (couple_id);
+CREATE INDEX IF NOT EXISTS idx_events_created_by ON public.events (created_by);
+CREATE INDEX IF NOT EXISTS idx_events_start_date ON public.events (start_date);
+CREATE INDEX IF NOT EXISTS idx_events_couple_month
+  ON public.events (couple_id, start_date);
+
+-- Enable Row Level Security
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+
+-- Couple members can view events for their couple
+CREATE POLICY "Couple members can view events"
+  ON public.events FOR SELECT
+  USING (
+    couple_id IN (
+      SELECT couple_id FROM public.couple_members WHERE user_id = auth.uid()
+    )
+  );
+
+-- Couple members can create events for their couple
+CREATE POLICY "Couple members can create events"
+  ON public.events FOR INSERT
+  WITH CHECK (
+    created_by = auth.uid()
+    AND couple_id IN (
+      SELECT couple_id FROM public.couple_members WHERE user_id = auth.uid()
+    )
+  );
+
+-- Only the event creator can update
+CREATE POLICY "Event creator can update"
+  ON public.events FOR UPDATE
+  USING (created_by = auth.uid())
+  WITH CHECK (created_by = auth.uid());
+
+-- Only the event creator can delete
+CREATE POLICY "Event creator can delete"
+  ON public.events FOR DELETE
+  USING (created_by = auth.uid());

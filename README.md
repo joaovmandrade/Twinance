@@ -4,6 +4,55 @@ Aplicativo de controle financeiro para casais, migrado de ReactJS/Vite para **Re
 
 ---
 
+## Ambiente de produção
+
+| Serviço | URL |
+|---|---|
+| **API (Render)** | https://twinance.onrender.com |
+| **Health check** | https://twinance.onrender.com/api/health |
+| **Supabase** | https://aphujuayzsstzhikhgoh.supabase.co |
+
+> O backend fica inativo após 15 min sem uso no plano gratuito do Render.
+> O primeiro request pode demorar até 30 s (cold start). O app trata isso com timeout de 30 s e retry automático.
+
+---
+
+## Configuração local
+
+```bash
+# 1. Instalar dependências
+npm install
+
+# 2. Copiar variáveis de ambiente
+cp .env.example .env
+# .env já vem pré-configurado com a URL de produção do Render
+
+# 3. Iniciar o app
+npm start
+```
+
+### Variáveis de ambiente (`.env`)
+
+| Variável | Descrição |
+|---|---|
+| `EXPO_PUBLIC_API_URL` | URL da API — `https://twinance.onrender.com` em produção |
+| `EXPO_PUBLIC_SUPABASE_URL` | URL do projeto Supabase |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Chave pública (anon) do Supabase |
+
+**Para desenvolvimento local contra backend rodando na máquina:**
+```bash
+# Android emulator
+EXPO_PUBLIC_API_URL=http://10.0.2.2:3001
+
+# iOS simulator
+EXPO_PUBLIC_API_URL=http://localhost:3001
+
+# Dispositivo físico (substitua pelo IP local)
+EXPO_PUBLIC_API_URL=http://192.168.1.100:3001
+```
+
+---
+
 ## Stack
 
 | Camada | Tecnologia | Versão |

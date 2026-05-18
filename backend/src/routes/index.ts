@@ -6,6 +6,7 @@ import { getMe } from '../controllers/meController'
 import coupleRoutes from './couples'
 import expenseRoutes from './expenses'
 import categoryRoutes from './categories'
+import eventRoutes from './events'
 
 const router = Router()
 
@@ -23,8 +24,9 @@ router.get('/health', (_req: Request, res: Response) => {
 
 router.get('/me', authMiddleware, (req, res) => getMe(req as AuthRequest, res))
 
-router.use('/couples', authMiddleware, coupleRoutes)
-router.use('/expenses', authMiddleware, expenseRoutes)
+router.use('/couples',    authMiddleware, coupleRoutes)
+router.use('/expenses',   authMiddleware, expenseRoutes)
 router.use('/categories', authMiddleware, categoryRoutes)
+router.use('/events',     authMiddleware, eventRoutes)
 
 export default router
