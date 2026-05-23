@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native'
+import { View, Text, ScrollView, Pressable, Alert, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link, router } from 'expo-router'
 import { useForm, Controller } from 'react-hook-form'
@@ -42,19 +42,19 @@ export default function RegisterScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-1 px-6 justify-center gap-8">
-          <View className="gap-1">
-            <Text className="text-3xl font-black text-gray-900">Criar conta</Text>
-            <Text className="text-base text-gray-500">Junte-se ao Twinance</Text>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Criar conta</Text>
+            <Text style={styles.subtitle}>Junte-se ao Twinance 💑</Text>
           </View>
 
-          <View className="gap-4">
+          <View style={styles.form}>
             <Controller
               control={control}
               name="name"
@@ -66,7 +66,7 @@ export default function RegisterScreen() {
                   onChangeText={onChange}
                   autoCapitalize="words"
                   error={errors.name?.message}
-                  leftIcon={<User size={18} color={colors.gray[400]} />}
+                  leftIcon={<User size={18} color={colors.muted} />}
                 />
               )}
             />
@@ -83,7 +83,7 @@ export default function RegisterScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   error={errors.email?.message}
-                  leftIcon={<Mail size={18} color={colors.gray[400]} />}
+                  leftIcon={<Mail size={18} color={colors.muted} />}
                 />
               )}
             />
@@ -99,7 +99,7 @@ export default function RegisterScreen() {
                   onChangeText={onChange}
                   secureTextEntry
                   error={errors.password?.message}
-                  leftIcon={<Lock size={18} color={colors.gray[400]} />}
+                  leftIcon={<Lock size={18} color={colors.muted} />}
                 />
               )}
             />
@@ -113,11 +113,11 @@ export default function RegisterScreen() {
             />
           </View>
 
-          <View className="flex-row justify-center gap-1">
-            <Text className="text-sm text-gray-500">Já tem conta?</Text>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Já tem conta?</Text>
             <Link href="/(auth)/login" asChild>
               <Pressable>
-                <Text className="text-sm font-bold text-primary-600">Entrar</Text>
+                <Text style={styles.footerLink}>Entrar</Text>
               </Pressable>
             </Link>
           </View>
@@ -126,3 +126,16 @@ export default function RegisterScreen() {
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  safe:       { flex: 1, backgroundColor: '#0F0E17' },
+  scroll:     { flexGrow: 1 },
+  container:  { flex: 1, paddingHorizontal: 24, justifyContent: 'center', gap: 36 },
+  header:     { gap: 4 },
+  title:      { fontSize: 30, fontFamily: 'Inter_900Black', color: '#F0EEF8' },
+  subtitle:   { fontSize: 15, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  form:       { gap: 16 },
+  footer:     { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  footerText: { fontSize: 14, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  footerLink: { fontSize: 14, fontFamily: 'Inter_700Bold', color: '#FF4D8D' },
+})

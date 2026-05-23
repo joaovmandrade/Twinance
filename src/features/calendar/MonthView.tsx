@@ -1,21 +1,10 @@
 import { useMemo, useRef } from 'react'
-import { View, Text, Pressable, Animated } from 'react-native'
+import { View, Text, Pressable, Animated, StyleSheet } from 'react-native'
 import { ChevronLeft, ChevronRight } from 'lucide-react-native'
 import {
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
-  isSameMonth,
-  isSameDay,
-  isToday,
-  addMonths,
-  subMonths,
-  getDate,
-  getMonth,
-  getYear,
-  parseISO,
+  startOfMonth, endOfMonth, startOfWeek, endOfWeek,
+  eachDayOfInterval, isSameMonth, isSameDay, isToday,
+  addMonths, subMonths, getDate, getMonth, getYear, parseISO,
 } from 'date-fns'
 import * as Haptics from 'expo-haptics'
 import { colors } from '@/theme'
@@ -37,21 +26,19 @@ interface MonthViewProps {
 }
 
 function getEventDotsForDay(date: Date, events: CalendarEvent[]): string[] {
-  const colors: string[] = []
+  const found: string[] = []
   for (const e of events) {
     try {
       const start = parseISO(e.startDate)
       if (isSameDay(start, date)) {
         const meta = EVENT_TYPE_META[e.type]
         const c = e.color || meta.color
-        if (!colors.includes(c)) colors.push(c)
+        if (!found.includes(c)) found.push(c)
       }
-    } catch {
-      // ignore parse errors
-    }
-    if (colors.length >= 3) break
+    } catch { /* ignore */ }
+    if (found.length >= 3) break
   }
-  return colors
+  return found
 }
 
 export function MonthView({
@@ -90,42 +77,34 @@ export function MonthView({
   const monthLabel = `${MONTH_NAMES[getMonth(currentMonth)]} ${getYear(currentMonth)}`
 
   return (
-    <View className="bg-white rounded-3xl overflow-hidden" style={{ elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}>
+    <View style={styles.card}>
       {/* Header */}
-      <View className="px-5 py-4 flex-row items-center justify-between">
-        <Pressable
-          onPress={handlePrev}
-          className="w-9 h-9 rounded-full bg-gray-100 items-center justify-center active:bg-gray-200"
-        >
-          <ChevronLeft size={18} color={colors.gray[600]} />
+      <View style={styles.navRow}>
+        <Pressable onPress={handlePrev} style={styles.navBtn}>
+          <ChevronLeft size={18} color={colors.muted} />
         </Pressable>
-
-        <Text className="text-base font-bold text-gray-900 capitalize">{monthLabel}</Text>
-
-        <Pressable
-          onPress={handleNext}
-          className="w-9 h-9 rounded-full bg-gray-100 items-center justify-center active:bg-gray-200"
-        >
-          <ChevronRight size={18} color={colors.gray[600]} />
+        <Text style={styles.monthLabel}>{monthLabel}</Text>
+        <Pressable onPress={handleNext} style={styles.navBtn}>
+          <ChevronRight size={18} color={colors.muted} />
         </Pressable>
       </View>
 
       {/* Day labels */}
-      <View className="flex-row px-2 pb-1">
+      <View style={styles.dayLabelsRow}>
         {DAY_LABELS.map((label, i) => (
-          <View key={i} className="flex-1 items-center">
-            <Text className="text-xs font-semibold text-gray-400">{label}</Text>
+          <View key={i} style={styles.dayLabelCell}>
+            <Text style={styles.dayLabel}>{label}</Text>
           </View>
         ))}
       </View>
 
-      {/* Calendar grid */}
+      {/* Grid */}
       <Animated.View style={{ opacity: fadeAnim }}>
-        <View className="flex-row flex-wrap px-2 pb-3">
+        <View style={styles.grid}>
           {days.map((day, index) => {
             const inMonth  = isSameMonth(day, currentMonth)
             const selected = isSameDay(day, selectedDate)
-            const today    = isToday(day)
+            const todayDay = isToday(day)
             const dots     = inMonth ? getEventDotsForDay(day, events) : []
 
             return (
@@ -137,52 +116,37 @@ export function MonthView({
                     onSelectDate(day)
                   }
                 }}
-                style={{ width: `${100 / 7}%`, paddingVertical: 2 }}
-                className="items-center"
+                style={styles.dayCell}
               >
-                <View
-                  className="w-9 h-9 rounded-full items-center justify-center"
-                  style={
-                    selected
-                      ? { backgroundColor: colors.primary[600] }
-                      : today
-                      ? { backgroundColor: colors.primary[100] }
-                      : undefined
-                  }
-                >
-                  <Text
-                    className="text-sm font-semibold"
-                    style={{
-                      color: selected
-                        ? '#fff'
-                        : today
-                        ? colors.primary[700]
-                        : inMonth
-                        ? colors.gray[800]
-                        : colors.gray[300],
-                    }}
-                  >
+                <View style={[
+                  styles.dayCircle,
+                  selected ? styles.dayCircleSelected : todayDay ? styles.dayCircleToday : undefined,
+                ]}>
+                  <Text style={[
+                    styles.dayText,
+                    selected ? styles.dayTextSelected
+                      : todayDay ? styles.dayTextToday
+                      : inMonth  ? styles.dayTextInMonth
+                      : styles.dayTextOutMonth,
+                  ]}>
                     {getDate(day)}
                   </Text>
                 </View>
 
-                {/* Event dots */}
                 {dots.length > 0 ? (
-                  <View className="flex-row gap-0.5 mt-0.5 h-1.5">
+                  <View style={styles.dotsRow}>
                     {dots.map((dotColor, di) => (
                       <View
                         key={di}
-                        style={{
-                          width: 5,
-                          height: 5,
-                          borderRadius: 3,
-                          backgroundColor: selected ? 'rgba(255,255,255,0.8)' : dotColor,
-                        }}
+                        style={[
+                          styles.dot,
+                          { backgroundColor: selected ? 'rgba(255,255,255,0.8)' : dotColor },
+                        ]}
                       />
                     ))}
                   </View>
                 ) : (
-                  <View className="h-1.5" />
+                  <View style={styles.dotsPlaceholder} />
                 )}
               </Pressable>
             )
@@ -192,3 +156,26 @@ export function MonthView({
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  card:            { backgroundColor: '#1A1827', borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: '#2D2A3E' },
+  navRow:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16 },
+  navBtn:          { width: 36, height: 36, borderRadius: 18, backgroundColor: '#221F32', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#2D2A3E' },
+  monthLabel:      { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#F0EEF8', textTransform: 'capitalize' },
+  dayLabelsRow:    { flexDirection: 'row', paddingHorizontal: 8, paddingBottom: 4 },
+  dayLabelCell:    { flex: 1, alignItems: 'center' },
+  dayLabel:        { fontSize: 11, fontFamily: 'Inter_600SemiBold', color: '#544F68' },
+  grid:            { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 8, paddingBottom: 12 },
+  dayCell:         { width: `${100 / 7}%`, paddingVertical: 2, alignItems: 'center' },
+  dayCircle:       { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  dayCircleSelected: { backgroundColor: '#FF4D8D' },
+  dayCircleToday:    { backgroundColor: '#2D1624' },
+  dayText:         { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  dayTextSelected: { color: '#fff' },
+  dayTextToday:    { color: '#FF4D8D' },
+  dayTextInMonth:  { color: '#F0EEF8' },
+  dayTextOutMonth: { color: '#2D2A3E' },
+  dotsRow:         { flexDirection: 'row', gap: 2, marginTop: 2, height: 6, alignItems: 'center' },
+  dot:             { width: 4, height: 4, borderRadius: 2 },
+  dotsPlaceholder: { height: 6 },
+})

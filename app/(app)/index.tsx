@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react'
-import { View, Text, ScrollView, Pressable } from 'react-native'
+import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -17,8 +17,8 @@ import { ExpenseCard } from '@/features/expenses/ExpenseCard'
 import { AddExpenseSheet } from '@/features/expenses/AddExpenseSheet'
 import { colors } from '@/theme'
 
-const USER_COLOR    = colors.primary[600]
-const PARTNER_COLOR = colors.primary[300]
+const USER_COLOR    = colors.primary[500]
+const PARTNER_COLOR = colors.partner[500]
 
 export default function DashboardScreen() {
   const user    = useAuthStore((s) => s.user)
@@ -35,7 +35,7 @@ export default function DashboardScreen() {
     return Object.entries(totals)
       .map(([cat, value]) => ({
         value,
-        color: CATEGORY_META[cat as keyof typeof CATEGORY_META]?.color ?? '#94a3b8',
+        color: CATEGORY_META[cat as keyof typeof CATEGORY_META]?.color ?? colors.muted,
         label: CATEGORY_META[cat as keyof typeof CATEGORY_META]?.label ?? cat,
         emoji: CATEGORY_META[cat as keyof typeof CATEGORY_META]?.emoji ?? '📦',
       }))
@@ -43,7 +43,7 @@ export default function DashboardScreen() {
   }, [expenses])
 
   const barData = [
-    { value: userTotal,    label: user?.name.split(' ')[0]    ?? 'Você',       frontColor: USER_COLOR },
+    { value: userTotal,    label: user?.name.split(' ')[0]    ?? 'Você',        frontColor: USER_COLOR },
     { value: partnerTotal, label: partner?.name.split(' ')[0] ?? 'Parceiro(a)', frontColor: PARTNER_COLOR },
   ]
 
@@ -51,11 +51,10 @@ export default function DashboardScreen() {
     ? (user?.name.split(' ')[0] ?? 'Você')
     : (partner?.name.split(' ')[0] ?? 'Parceiro(a)')
   const topAmount = Math.max(userTotal, partnerTotal)
-
   const recentExpenses = expenses.slice(0, 5)
 
   if (isLoading) return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={{ padding: 20, gap: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View style={{ gap: 6 }}>
@@ -64,74 +63,58 @@ export default function DashboardScreen() {
           </View>
           <Skeleton width={44} height={44} borderRadius={22} />
         </View>
-        <Skeleton height={152} borderRadius={28} />
+        <Skeleton height={152} borderRadius={24} />
         <Skeleton height={64} borderRadius={16} />
         <Skeleton height={180} borderRadius={16} />
         <Skeleton height={200} borderRadius={16} />
         <View style={{ gap: 8 }}>
           <Skeleton width={120} height={14} />
-          {[0, 1, 2].map((i) => <Skeleton key={i} height={68} borderRadius={16} />)}
+          {[0, 1, 2].map((i) => <Skeleton key={i} height={68} borderRadius={14} />)}
         </View>
       </View>
     </SafeAreaView>
   )
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
-        contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 32 }}
+        contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View className="flex-row items-center justify-between">
+        <View style={styles.header}>
           <View>
-            <Text className="text-sm text-gray-500" style={{ fontFamily: 'Inter_400Regular' }}>
-              Olá,
-            </Text>
-            <Text className="text-2xl text-gray-900" style={{ fontFamily: 'Inter_900Black' }}>
-              {user?.name.split(' ')[0]} 👋
-            </Text>
+            <Text style={styles.greeting}>Olá,</Text>
+            <Text style={styles.userName}>{user?.name.split(' ')[0]} 👋</Text>
           </View>
-          {user && <Avatar name={user.name} size="lg" />}
+          {user && <Avatar name={user.name} size="lg" variant="you" />}
         </View>
 
         {/* Total card */}
         <LinearGradient
-          colors={[colors.primary[600], colors.primary[800]]}
+          colors={['#FF4D8D', '#9B6CFF']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{ borderRadius: 28, padding: 24 }}
+          style={styles.totalCard}
         >
-          <Text className="text-sm text-primary-200" style={{ fontFamily: 'Inter_500Medium' }}>
-            Total do casal este mês
-          </Text>
-          <Text className="text-4xl text-white mt-1" style={{ fontFamily: 'Inter_900Black' }}>
-            {formatCurrency(grandTotal)}
-          </Text>
-          <View className="flex-row items-center gap-2 mt-3">
-            <TrendingUp size={14} color={colors.primary[300]} />
-            <Text className="text-xs text-primary-300">
-              {expenses.length} transações este mês
-            </Text>
+          <Text style={styles.totalLabel}>Total do casal este mês</Text>
+          <Text style={styles.totalAmount}>{formatCurrency(grandTotal)}</Text>
+          <View style={styles.totalMeta}>
+            <TrendingUp size={14} color="rgba(255,255,255,0.7)" />
+            <Text style={styles.totalMetaText}>{expenses.length} transações este mês</Text>
           </View>
 
           {grandTotal > 0 && (
             <>
-              <View className="flex-row gap-1 h-2 rounded-full overflow-hidden mt-4 bg-white/20">
-                <View
-                  className="bg-white/90 rounded-full"
-                  style={{ flex: userTotal / grandTotal }}
-                />
-                <View
-                  className="bg-white/40 rounded-full"
-                  style={{ flex: partnerTotal / grandTotal }}
-                />
+              <View style={styles.progressBar}>
+                <View style={[styles.progressYou, { flex: userTotal / grandTotal }]} />
+                <View style={[styles.progressPartner, { flex: partnerTotal / grandTotal }]} />
               </View>
-              <View className="flex-row justify-between mt-1.5">
-                <Text className="text-xs text-primary-200">
+              <View style={styles.progressLabels}>
+                <Text style={styles.progressLabel}>
                   {user?.name.split(' ')[0]}: {formatCurrency(userTotal)}
                 </Text>
-                <Text className="text-xs text-primary-200">
+                <Text style={styles.progressLabel}>
                   {partner?.name.split(' ')[0] ?? 'Parceiro(a)'}: {formatCurrency(partnerTotal)}
                 </Text>
               </View>
@@ -142,15 +125,15 @@ export default function DashboardScreen() {
         {/* Who spent more */}
         {grandTotal > 0 && (
           <Card padding="md">
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 bg-amber-100 rounded-2xl items-center justify-center">
-                <Award size={20} color="#d97706" />
+            <View style={styles.topSpender}>
+              <View style={styles.awardBox}>
+                <Award size={20} color="#F5A623" />
               </View>
-              <View className="flex-1">
-                <Text className="text-xs text-gray-500">Quem gastou mais</Text>
-                <Text className="text-sm font-bold text-gray-900">
+              <View style={{ flex: 1 }}>
+                <Text style={styles.topSpenderLabel}>Quem gastou mais</Text>
+                <Text style={styles.topSpenderName}>
                   {topSpenderName}{' '}
-                  <Text className="font-normal text-gray-500">— {formatCurrency(topAmount)}</Text>
+                  <Text style={styles.topSpenderAmount}>— {formatCurrency(topAmount)}</Text>
                 </Text>
               </View>
             </View>
@@ -159,7 +142,7 @@ export default function DashboardScreen() {
 
         {/* Bar chart */}
         <Card padding="lg">
-          <Text className="text-sm font-bold text-gray-800 mb-4">Comparação de gastos</Text>
+          <Text style={styles.sectionTitle}>Comparação de gastos</Text>
           <BarChart
             data={barData}
             barWidth={56}
@@ -167,85 +150,78 @@ export default function DashboardScreen() {
             roundedTop
             hideRules
             hideYAxisText
-            xAxisLabelTextStyle={{ fontSize: 11, color: colors.gray[400], fontFamily: 'Inter_500Medium' }}
+            xAxisLabelTextStyle={{ fontSize: 11, color: colors.muted, fontFamily: 'Inter_500Medium' }}
             noOfSections={4}
             maxValue={Math.max(grandTotal, 10)}
             width={240}
+            xAxisColor={colors.rim}
+            yAxisColor={colors.rim}
+            backgroundColor={colors.surface}
           />
         </Card>
 
         {/* Donut chart */}
         <Card padding="lg">
-          <Text className="text-sm font-bold text-gray-800 mb-4">Gastos por categoria</Text>
+          <Text style={styles.sectionTitle}>Gastos por categoria</Text>
           {categoryData.length > 0 ? (
-            <View className="flex-row items-center gap-4">
+            <View style={styles.donutRow}>
               <PieChart
                 data={categoryData}
                 donut
                 innerRadius={50}
                 radius={76}
                 centerLabelComponent={() => (
-                  <Text className="text-xs font-bold text-gray-500">
-                    {categoryData.length} cat.
-                  </Text>
+                  <Text style={styles.donutCenter}>{categoryData.length} cat.</Text>
                 )}
               />
-              <View className="flex-1 gap-2">
+              <View style={styles.legend}>
                 {categoryData.slice(0, 5).map((cat) => (
-                  <View key={cat.label} className="flex-row items-center gap-2">
-                    <View
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    <Text className="text-xs text-gray-600 flex-1" numberOfLines={1}>
+                  <View key={cat.label} style={styles.legendRow}>
+                    <View style={[styles.legendDot, { backgroundColor: cat.color }]} />
+                    <Text style={styles.legendLabel} numberOfLines={1}>
                       {cat.emoji} {cat.label}
                     </Text>
-                    <Text className="text-xs font-semibold text-gray-800">
-                      {formatCurrency(cat.value)}
-                    </Text>
+                    <Text style={styles.legendValue}>{formatCurrency(cat.value)}</Text>
                   </View>
                 ))}
               </View>
             </View>
           ) : (
-            <Text className="text-sm text-gray-400 text-center py-4">
-              Nenhum gasto ainda.
-            </Text>
+            <Text style={styles.emptyChart}>Nenhum gasto ainda.</Text>
           )}
         </Card>
 
         {/* Recent expenses */}
         <View>
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-sm font-bold text-gray-800">Últimos gastos</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Últimos gastos</Text>
             <Pressable
               onPress={() => router.push('/(app)/expenses')}
-              className="flex-row items-center gap-1"
+              style={styles.seeAll}
             >
-              <Text className="text-xs font-semibold text-primary-600">Ver todos</Text>
-              <ArrowRight size={12} color={colors.primary[600]} />
+              <Text style={styles.seeAllText}>Ver todos</Text>
+              <ArrowRight size={12} color={colors.primary[500]} />
             </Pressable>
           </View>
 
           {recentExpenses.length > 0 ? (
-            <View className="gap-2">
+            <View style={{ gap: 8 }}>
               {recentExpenses.map((expense) => {
                 const expUser = expense.userId === user?.id ? user : partner
+                const isOwner = expense.userId === user?.id
                 return (
                   <ExpenseCard
                     key={expense.id}
                     expense={expense}
                     user={expUser}
-                    isOwner={expense.userId === user?.id}
+                    isOwner={isOwner}
                   />
                 )
               })}
             </View>
           ) : (
             <Card padding="md">
-              <Text className="text-sm text-gray-400 text-center">
-                Adicione seu primeiro gasto com o botão +
-              </Text>
+              <Text style={styles.emptyText}>Adicione seu primeiro gasto com o botão +</Text>
             </Card>
           )}
         </View>
@@ -254,13 +230,57 @@ export default function DashboardScreen() {
       {/* FAB */}
       <Pressable
         onPress={() => sheetRef.current?.expand()}
-        className="absolute bottom-24 right-6 w-14 h-14 bg-primary-600 rounded-full items-center justify-center"
-        style={{ shadowColor: colors.primary[800], shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 8 }}
+        style={styles.fab}
       >
-        <Plus size={28} color="#fff" />
+        <LinearGradient
+          colors={['#FF4D8D', '#9B6CFF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.fabGradient}
+        >
+          <Plus size={26} color="#fff" />
+        </LinearGradient>
       </Pressable>
 
       <AddExpenseSheet ref={sheetRef} />
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  safe:            { flex: 1, backgroundColor: '#0F0E17' },
+  scroll:          { padding: 20, gap: 16, paddingBottom: 100 },
+  header:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  greeting:        { fontSize: 13, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  userName:        { fontSize: 24, color: '#F0EEF8', fontFamily: 'Inter_900Black' },
+  totalCard:       { borderRadius: 24, padding: 24 },
+  totalLabel:      { fontSize: 13, color: 'rgba(255,255,255,0.75)', fontFamily: 'Inter_500Medium' },
+  totalAmount:     { fontSize: 36, color: '#fff', fontFamily: 'Inter_900Black', marginTop: 4 },
+  totalMeta:       { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
+  totalMetaText:   { fontSize: 12, color: 'rgba(255,255,255,0.65)', fontFamily: 'Inter_400Regular' },
+  progressBar:     { flexDirection: 'row', height: 6, borderRadius: 4, overflow: 'hidden', marginTop: 16, backgroundColor: 'rgba(255,255,255,0.2)' },
+  progressYou:     { backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 4 },
+  progressPartner: { backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: 4 },
+  progressLabels:  { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
+  progressLabel:   { fontSize: 11, color: 'rgba(255,255,255,0.75)', fontFamily: 'Inter_400Regular' },
+  topSpender:      { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  awardBox:        { width: 40, height: 40, backgroundColor: '#F5A62322', borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  topSpenderLabel: { fontSize: 11, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  topSpenderName:  { fontSize: 13, fontFamily: 'Inter_700Bold', color: '#F0EEF8' },
+  topSpenderAmount:{ fontFamily: 'Inter_400Regular', color: '#9B97B2' },
+  sectionHeader:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  sectionTitle:    { fontSize: 14, fontFamily: 'Inter_700Bold', color: '#F0EEF8', marginBottom: 16 },
+  seeAll:          { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  seeAllText:      { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: '#FF4D8D' },
+  donutRow:        { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  donutCenter:     { fontSize: 11, fontFamily: 'Inter_700Bold', color: '#9B97B2', textAlign: 'center' },
+  legend:          { flex: 1, gap: 8 },
+  legendRow:       { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  legendDot:       { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
+  legendLabel:     { fontSize: 11, color: '#9B97B2', flex: 1, fontFamily: 'Inter_400Regular' },
+  legendValue:     { fontSize: 11, fontFamily: 'Inter_600SemiBold', color: '#F0EEF8' },
+  emptyChart:      { fontSize: 13, color: '#9B97B2', textAlign: 'center', paddingVertical: 16, fontFamily: 'Inter_400Regular' },
+  emptyText:       { fontSize: 13, color: '#9B97B2', textAlign: 'center', fontFamily: 'Inter_400Regular' },
+  fab:             { position: 'absolute', bottom: 88, right: 20 },
+  fabGradient:     { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', shadowColor: '#FF4D8D', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 16, elevation: 10 },
+})

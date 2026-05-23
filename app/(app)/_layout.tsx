@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router'
 import { LayoutDashboard, Receipt, CalendarDays, UserCircle } from 'lucide-react-native'
-import { colors } from '@/theme'
+import { Platform } from 'react-native'
 
 export default function AppLayout() {
   return (
@@ -8,15 +8,15 @@ export default function AppLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: '#1A1827',
           borderTopWidth: 1,
-          borderTopColor: '#f1f5f9',
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 64,
+          borderTopColor: '#2D2A3E',
+          paddingBottom: Platform.OS === 'ios' ? 24 : 10,
+          paddingTop: 10,
+          height: Platform.OS === 'ios' ? 84 : 68,
         },
-        tabBarActiveTintColor: colors.primary[600],
-        tabBarInactiveTintColor: colors.gray[400],
+        tabBarActiveTintColor:   '#FF4D8D',
+        tabBarInactiveTintColor: '#544F68',
         tabBarLabelStyle: {
           fontSize: 11,
           fontFamily: 'Inter_600SemiBold',

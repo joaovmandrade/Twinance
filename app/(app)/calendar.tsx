@@ -1,7 +1,5 @@
 import { useRef, useState, useMemo, useCallback } from 'react'
-import {
-  View, Text, ScrollView, Pressable, Alert,
-} from 'react-native'
+import { View, Text, ScrollView, Pressable, Alert, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Plus, Sparkles } from 'lucide-react-native'
@@ -14,7 +12,7 @@ import {
 import { ptBR } from 'date-fns/locale'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { MonthView, EventModal, EventCard, UpcomingEvents } from '@/features/calendar'
-import { useMonthEvents, useEvents, useDeleteEvent } from '@/hooks/useEvents'
+import { useMonthEvents, useDeleteEvent } from '@/hooks/useEvents'
 import { colors } from '@/theme'
 import type { CalendarEvent } from '@/types'
 
@@ -27,11 +25,11 @@ function formatSelectedDate(date: Date): string {
 
 function CalendarSkeleton() {
   return (
-    <View className="gap-3 px-4">
+    <View style={{ gap: 12, padding: 16 }}>
       <Skeleton height={320} borderRadius={24} />
       <Skeleton height={24} width="40%" borderRadius={8} />
-      <Skeleton height={72} borderRadius={16} />
-      <Skeleton height={72} borderRadius={16} />
+      <Skeleton height={72} borderRadius={14} />
+      <Skeleton height={72} borderRadius={14} />
     </View>
   )
 }
@@ -39,40 +37,32 @@ function CalendarSkeleton() {
 export default function CalendarScreen() {
   const today = useMemo(() => new Date(), [])
   const [currentMonth, setCurrentMonth] = useState<Date>(today)
-  const [selectedDate, setSelectedDate] = useState<Date>(today)
-  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
+  const [selectedDate,  setSelectedDate]  = useState<Date>(today)
+  const [editingEvent,  setEditingEvent]  = useState<CalendarEvent | null>(null)
 
   const sheetRef = useRef<BottomSheet>(null)
   const { mutate: deleteEvent } = useDeleteEvent()
 
-  // Fetch events for the visible month
   const { events: monthEvents, isLoading } = useMonthEvents(
     getYear(currentMonth),
     getMonth(currentMonth) + 1,
   )
 
-  // Upcoming events: from today for next 30 days
   const upcomingEvents = useMemo(() => {
     const from = startOfDay(today)
     return monthEvents
       .filter((e) => {
         try {
           return isAfter(parseISO(e.startDate), from) || isSameDay(parseISO(e.startDate), from)
-        } catch {
-          return false
-        }
+        } catch { return false }
       })
       .slice(0, 20)
   }, [monthEvents, today])
 
-  // Events for the selected day
   const selectedDayEvents = useMemo(() => {
     return monthEvents.filter((e) => {
-      try {
-        return isSameDay(parseISO(e.startDate), selectedDate)
-      } catch {
-        return false
-      }
+      try { return isSameDay(parseISO(e.startDate), selectedDate) }
+      catch { return false }
     })
   }, [monthEvents, selectedDate])
 
@@ -93,65 +83,53 @@ export default function CalendarScreen() {
       `Deseja excluir "${event.title}"?`,
       [
         { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => deleteEvent(event.id),
-        },
+        { text: 'Excluir', style: 'destructive', onPress: () => deleteEvent(event.id) },
       ],
     )
   }
 
   const handleMonthChange = useCallback((month: Date) => {
     setCurrentMonth(month)
-    // Keep selected date in sync if it's within the new month
   }, [])
 
   const defaultDate = format(selectedDate, 'yyyy-MM-dd')
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Gradient header */}
       <LinearGradient
-        colors={[colors.primary[700], colors.primary[500]]}
+        colors={['#9B6CFF', '#FF4D8D']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-5 pt-3 pb-5"
+        style={styles.gradientHeader}
       >
-        <View className="flex-row items-center justify-between">
-          <View className="gap-0.5">
-            <View className="flex-row items-center gap-2">
-              <Sparkles size={16} color="rgba(255,255,255,0.8)" />
-              <Text className="text-white/80 text-xs font-semibold tracking-wide uppercase">
-                Calendário do casal
-              </Text>
+        <View style={styles.headerRow}>
+          <View style={{ gap: 2 }}>
+            <View style={styles.headerBadge}>
+              <Sparkles size={14} color="rgba(255,255,255,0.8)" />
+              <Text style={styles.headerBadgeText}>Calendário do casal</Text>
             </View>
-            <Text className="text-white text-2xl font-black">
+            <Text style={styles.headerMonth}>
               {format(currentMonth, "MMMM 'de' yyyy", { locale: ptBR })}
             </Text>
           </View>
-
-          <Pressable
-            onPress={openAddEvent}
-            className="w-11 h-11 rounded-full bg-white/20 items-center justify-center active:bg-white/30"
-          >
+          <Pressable onPress={openAddEvent} style={styles.addBtn}>
             <Plus size={22} color="#fff" />
           </Pressable>
         </View>
       </LinearGradient>
 
       {isLoading ? (
-        <ScrollView className="flex-1 pt-4" showsVerticalScrollIndicator={false}>
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           <CalendarSkeleton />
         </ScrollView>
       ) : (
         <ScrollView
-          className="flex-1"
+          style={{ flex: 1 }}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100, gap: 16, paddingTop: 16 }}
+          contentContainerStyle={styles.scrollContent}
         >
-          {/* Month grid */}
-          <View className="px-4">
+          <View style={{ paddingHorizontal: 16 }}>
             <MonthView
               currentMonth={currentMonth}
               selectedDate={selectedDate}
@@ -161,18 +139,15 @@ export default function CalendarScreen() {
             />
           </View>
 
-          {/* Selected day events */}
-          <View className="px-4 gap-3">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-base font-bold text-gray-900 capitalize">
+          {/* Selected day */}
+          <View style={styles.section}>
+            <View style={styles.dayHeader}>
+              <Text style={styles.dayTitle}>
                 {formatSelectedDate(selectedDate)}
               </Text>
               {selectedDayEvents.length > 0 && (
-                <View
-                  className="px-2.5 py-1 rounded-full"
-                  style={{ backgroundColor: colors.primary[100] }}
-                >
-                  <Text className="text-xs font-bold" style={{ color: colors.primary[700] }}>
+                <View style={styles.eventCountBadge}>
+                  <Text style={styles.eventCountText}>
                     {selectedDayEvents.length} evento{selectedDayEvents.length > 1 ? 's' : ''}
                   </Text>
                 </View>
@@ -180,22 +155,16 @@ export default function CalendarScreen() {
             </View>
 
             {selectedDayEvents.length === 0 ? (
-              <Pressable
-                onPress={openAddEvent}
-                className="flex-row items-center gap-3 bg-white rounded-2xl px-4 py-3 border border-dashed border-gray-200 active:opacity-70"
-              >
-                <View
-                  className="w-9 h-9 rounded-full items-center justify-center"
-                  style={{ backgroundColor: colors.primary[50] }}
-                >
+              <Pressable onPress={openAddEvent} style={styles.emptyDay}>
+                <View style={styles.emptyDayIcon}>
                   <Plus size={18} color={colors.primary[500]} />
                 </View>
-                <Text className="text-sm text-gray-400 font-medium">
+                <Text style={styles.emptyDayText}>
                   Nenhum evento — adicionar algo especial?
                 </Text>
               </Pressable>
             ) : (
-              <View className="gap-2">
+              <View style={{ gap: 8 }}>
                 {selectedDayEvents.map((e) => (
                   <EventCard
                     key={e.id}
@@ -208,10 +177,9 @@ export default function CalendarScreen() {
             )}
           </View>
 
-          {/* Upcoming events */}
           {upcomingEvents.length > 0 && (
-            <View className="px-4 gap-3">
-              <Text className="text-base font-bold text-gray-900">Próximos eventos</Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Próximos eventos</Text>
               <UpcomingEvents
                 events={upcomingEvents}
                 onEventPress={openEditEvent}
@@ -220,22 +188,22 @@ export default function CalendarScreen() {
             </View>
           )}
 
-          {/* Empty state for month */}
           {monthEvents.length === 0 && (
-            <View className="px-4 items-center py-6 gap-3">
-              <Text className="text-4xl">📅</Text>
-              <Text className="text-base font-bold text-gray-700 text-center">
-                Nenhum evento este mês
-              </Text>
-              <Text className="text-sm text-gray-400 text-center px-8">
+            <View style={styles.emptyMonth}>
+              <Text style={styles.emptyEmoji}>📅</Text>
+              <Text style={styles.emptyTitle}>Nenhum evento este mês</Text>
+              <Text style={styles.emptySubtitle}>
                 Planejem juntos: datas especiais, contas, viagens e metas
               </Text>
-              <Pressable
-                onPress={openAddEvent}
-                className="mt-2 px-6 py-3 rounded-full active:opacity-70"
-                style={{ backgroundColor: colors.primary[600] }}
-              >
-                <Text className="text-white font-bold text-sm">Criar primeiro evento</Text>
+              <Pressable onPress={openAddEvent} style={styles.createBtn}>
+                <LinearGradient
+                  colors={['#FF4D8D', '#9B6CFF']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.createBtnGradient}
+                >
+                  <Text style={styles.createBtnText}>Criar primeiro evento</Text>
+                </LinearGradient>
               </Pressable>
             </View>
           )}
@@ -243,19 +211,15 @@ export default function CalendarScreen() {
       )}
 
       {/* FAB */}
-      <Pressable
-        onPress={openAddEvent}
-        className="absolute bottom-6 right-5 w-14 h-14 rounded-full items-center justify-center active:opacity-80"
-        style={{
-          backgroundColor: colors.primary[600],
-          elevation: 8,
-          shadowColor: colors.primary[700],
-          shadowOpacity: 0.4,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 6 },
-        }}
-      >
-        <Plus size={26} color="#fff" />
+      <Pressable onPress={openAddEvent} style={styles.fab}>
+        <LinearGradient
+          colors={['#FF4D8D', '#9B6CFF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.fabGradient}
+        >
+          <Plus size={26} color="#fff" />
+        </LinearGradient>
       </Pressable>
 
       <EventModal
@@ -268,3 +232,32 @@ export default function CalendarScreen() {
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  safe:            { flex: 1, backgroundColor: '#0F0E17' },
+  gradientHeader:  { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 20 },
+  headerRow:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerBadge:     { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  headerBadgeText: { color: 'rgba(255,255,255,0.8)', fontSize: 11, fontFamily: 'Inter_600SemiBold', textTransform: 'uppercase', letterSpacing: 0.5 },
+  headerMonth:     { color: '#fff', fontSize: 24, fontFamily: 'Inter_900Black', textTransform: 'capitalize', marginTop: 2 },
+  addBtn:          { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  scrollContent:   { paddingBottom: 100, gap: 20, paddingTop: 16 },
+  section:         { paddingHorizontal: 16, gap: 12 },
+  dayHeader:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  dayTitle:        { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#F0EEF8', textTransform: 'capitalize' },
+  eventCountBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: '#2D1624' },
+  eventCountText:  { fontSize: 11, fontFamily: 'Inter_700Bold', color: '#FF4D8D' },
+  emptyDay:        { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#1A1827', borderRadius: 16, paddingHorizontal: 16, paddingVertical: 14, borderWidth: 1, borderColor: '#2D2A3E', borderStyle: 'dashed' },
+  emptyDayIcon:    { width: 36, height: 36, borderRadius: 18, backgroundColor: '#2D1624', alignItems: 'center', justifyContent: 'center' },
+  emptyDayText:    { fontSize: 13, color: '#9B97B2', fontFamily: 'Inter_500Medium', flex: 1 },
+  sectionTitle:    { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#F0EEF8' },
+  emptyMonth:      { paddingHorizontal: 16, alignItems: 'center', paddingVertical: 24, gap: 10 },
+  emptyEmoji:      { fontSize: 40 },
+  emptyTitle:      { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#F0EEF8', textAlign: 'center' },
+  emptySubtitle:   { fontSize: 13, color: '#9B97B2', textAlign: 'center', paddingHorizontal: 32, fontFamily: 'Inter_400Regular' },
+  createBtn:       { marginTop: 8 },
+  createBtnGradient: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 },
+  createBtnText:   { color: '#fff', fontFamily: 'Inter_700Bold', fontSize: 14 },
+  fab:             { position: 'absolute', bottom: 88, right: 20 },
+  fabGradient:     { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', shadowColor: '#9B6CFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 16, elevation: 10 },
+})

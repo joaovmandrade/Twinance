@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useMemo } from 'react'
-import { View, Text, Switch, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { View, Text, Switch, Platform, StyleSheet } from 'react-native'
 import BottomSheet, { BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import type { BottomSheetBackdropProps } from '@gorhom/bottom-sheet'
 import { useForm, Controller } from 'react-hook-form'
@@ -48,7 +48,7 @@ export const AddExpenseSheet = forwardRef<BottomSheet, AddExpenseSheetProps>(
 
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
+        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.7} />
       ),
       [],
     )
@@ -67,16 +67,16 @@ export const AddExpenseSheet = forwardRef<BottomSheet, AddExpenseSheetProps>(
         snapPoints={snapPoints}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: '#fff', borderRadius: 28 }}
-        handleIndicatorStyle={{ backgroundColor: colors.gray[300], width: 40 }}
+        backgroundStyle={styles.sheetBg}
+        handleIndicatorStyle={styles.handle}
         keyboardBehavior={Platform.OS === 'ios' ? 'extend' : 'interactive'}
         keyboardBlurBehavior="restore"
       >
         <BottomSheetScrollView
-          contentContainerStyle={{ padding: 24, gap: 20, paddingBottom: 48 }}
+          contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          <Text className="text-xl font-black text-gray-900">Novo gasto</Text>
+          <Text style={styles.sheetTitle}>Novo gasto</Text>
 
           <Controller
             control={control}
@@ -108,7 +108,7 @@ export const AddExpenseSheet = forwardRef<BottomSheet, AddExpenseSheetProps>(
           />
 
           <View>
-            <Text className="text-sm font-semibold text-gray-700 mb-2">Categoria</Text>
+            <Text style={styles.fieldLabel}>Categoria</Text>
             <Controller
               control={control}
               name="category"
@@ -136,16 +136,16 @@ export const AddExpenseSheet = forwardRef<BottomSheet, AddExpenseSheetProps>(
             control={control}
             name="recurring"
             render={({ field: { onChange, value } }) => (
-              <View className="flex-row items-center justify-between bg-gray-50 rounded-2xl px-4 py-3">
+              <View style={styles.toggleRow}>
                 <View>
-                  <Text className="text-sm font-semibold text-gray-800">Recorrente</Text>
-                  <Text className="text-xs text-gray-400">Gasto fixo mensal</Text>
+                  <Text style={styles.toggleLabel}>Recorrente</Text>
+                  <Text style={styles.toggleSubtitle}>Gasto fixo mensal</Text>
                 </View>
                 <Switch
                   value={value}
                   onValueChange={onChange}
-                  trackColor={{ false: colors.gray[200], true: colors.primary[500] }}
-                  thumbColor={colors.white}
+                  trackColor={{ false: colors.rim, true: colors.primary[500] }}
+                  thumbColor={colors.onDark}
                 />
               </View>
             )}
@@ -165,3 +165,14 @@ export const AddExpenseSheet = forwardRef<BottomSheet, AddExpenseSheetProps>(
 )
 
 AddExpenseSheet.displayName = 'AddExpenseSheet'
+
+const styles = StyleSheet.create({
+  sheetBg:      { backgroundColor: '#1A1827', borderRadius: 28 },
+  handle:       { backgroundColor: '#544F68', width: 40 },
+  content:      { padding: 24, gap: 20, paddingBottom: 48 },
+  sheetTitle:   { fontSize: 20, fontFamily: 'Inter_900Black', color: '#F0EEF8' },
+  fieldLabel:   { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#B8B4CC', marginBottom: 8 },
+  toggleRow:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#221F32', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#2D2A3E' },
+  toggleLabel:  { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#F0EEF8' },
+  toggleSubtitle: { fontSize: 11, color: '#9B97B2', fontFamily: 'Inter_400Regular', marginTop: 2 },
+})

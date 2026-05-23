@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TextInputProps } from 'react-native'
+import { View, Text, TextInput, TextInputProps, StyleSheet } from 'react-native'
 import { colors } from '@/theme'
 
 interface InputProps extends TextInputProps {
@@ -10,26 +10,42 @@ interface InputProps extends TextInputProps {
 
 export function Input({ label, error, leftIcon, rightIcon, ...props }: InputProps) {
   return (
-    <View className="gap-1.5">
-      {label && (
-        <Text className="text-sm font-semibold text-gray-700">{label}</Text>
-      )}
-      <View
-        className={[
-          'flex-row items-center bg-gray-50 rounded-2xl border px-4 gap-3',
-          error ? 'border-red-400' : 'border-gray-200',
-        ].join(' ')}
-      >
+    <View style={styles.wrapper}>
+      {label && <Text style={styles.label}>{label}</Text>}
+      <View style={[styles.container, error ? styles.containerError : styles.containerNormal]}>
         {leftIcon && <View>{leftIcon}</View>}
         <TextInput
-          className="flex-1 py-3.5 text-base text-gray-900"
-          placeholderTextColor={colors.gray[400]}
-          style={{ fontFamily: 'Inter_400Regular' }}
+          style={styles.input}
+          placeholderTextColor={colors.muted}
           {...props}
         />
         {rightIcon && <View>{rightIcon}</View>}
       </View>
-      {error && <Text className="text-xs text-red-500 ml-1">{error}</Text>}
+      {error && <Text style={styles.error}>{error}</Text>}
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  wrapper:         { gap: 6 },
+  label:           { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#B8B4CC' },
+  container:       {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#221F32',
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    gap: 10,
+  },
+  containerNormal: { borderColor: '#2D2A3E' },
+  containerError:  { borderColor: '#FF5170' },
+  input:           {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: '#F0EEF8',
+    fontFamily: 'Inter_400Regular',
+  },
+  error:           { fontSize: 12, color: '#FF5170', marginLeft: 4 },
+})

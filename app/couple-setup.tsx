@@ -1,14 +1,13 @@
 import { useState } from 'react'
-import { View, Text, Alert } from 'react-native'
+import { View, Text, Alert, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import { Users, LogIn, Plus } from 'lucide-react-native'
-import { Input, Button, Card } from '@/components/ui'
+import { Input, Button } from '@/components/ui'
 import { useCreateCouple, useJoinCouple } from '@/hooks/useCouple'
 import { logout } from '@/services/authService'
 import { useAuthStore } from '@/store/authStore'
 import { useCoupleStore } from '@/store/coupleStore'
-import { colors } from '@/theme'
 
 export default function CoupleSetupScreen() {
   const [inviteCode, setInviteCode] = useState('')
@@ -47,28 +46,33 @@ export default function CoupleSetupScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
-      <View className="flex-1 px-6 justify-center gap-8">
-        {/* Header */}
-        <View className="items-center gap-3">
-          <View className="w-20 h-20 bg-primary-100 rounded-3xl items-center justify-center">
-            <Users size={40} color={colors.primary[600]} />
-          </View>
-          <Text className="text-2xl font-black text-gray-900 text-center">Configurar casal</Text>
-          <Text className="text-sm text-gray-500 text-center leading-relaxed">
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <View style={styles.container}>
+        {/* Brand header */}
+        <View style={styles.brand}>
+          <LinearGradient
+            colors={['#FF4D8D', '#9B6CFF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.logoBox}
+          >
+            <Text style={styles.logoEmoji}>💑</Text>
+          </LinearGradient>
+          <Text style={styles.title}>Configurar casal</Text>
+          <Text style={styles.subtitle}>
             Crie um novo casal ou entre no casal{'\n'}do seu parceiro com o código de convite
           </Text>
         </View>
 
         {/* Create couple */}
-        <Card padding="lg">
-          <View className="flex-row items-center gap-3 mb-4">
-            <View className="w-10 h-10 bg-primary-100 rounded-2xl items-center justify-center">
-              <Plus size={20} color={colors.primary[600]} />
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardIconRose}>
+              <Text style={{ fontSize: 18 }}>✨</Text>
             </View>
             <View>
-              <Text className="text-base font-bold text-gray-900">Criar um casal</Text>
-              <Text className="text-xs text-gray-500">Você receberá um código para compartilhar</Text>
+              <Text style={styles.cardTitle}>Criar um casal</Text>
+              <Text style={styles.cardSubtitle}>Você receberá um código para compartilhar</Text>
             </View>
           </View>
           <Button
@@ -77,27 +81,27 @@ export default function CoupleSetupScreen() {
             loading={creating}
             fullWidth
           />
-        </Card>
+        </View>
 
         {/* Divider */}
-        <View className="flex-row items-center gap-3">
-          <View className="flex-1 h-px bg-gray-200" />
-          <Text className="text-xs font-semibold text-gray-400">OU</Text>
-          <View className="flex-1 h-px bg-gray-200" />
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>OU</Text>
+          <View style={styles.dividerLine} />
         </View>
 
         {/* Join couple */}
-        <Card padding="lg">
-          <View className="flex-row items-center gap-3 mb-4">
-            <View className="w-10 h-10 bg-violet-100 rounded-2xl items-center justify-center">
-              <LogIn size={20} color={colors.primary[700]} />
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardIconViolet}>
+              <Text style={{ fontSize: 18 }}>🔗</Text>
             </View>
             <View>
-              <Text className="text-base font-bold text-gray-900">Entrar em um casal</Text>
-              <Text className="text-xs text-gray-500">Use o código do seu parceiro</Text>
+              <Text style={styles.cardTitle}>Entrar em um casal</Text>
+              <Text style={styles.cardSubtitle}>Use o código do seu parceiro</Text>
             </View>
           </View>
-          <View className="gap-3">
+          <View style={{ gap: 12 }}>
             <Input
               placeholder="Ex: TWIN-AB3X"
               value={inviteCode}
@@ -113,10 +117,29 @@ export default function CoupleSetupScreen() {
               fullWidth
             />
           </View>
-        </Card>
+        </View>
 
         <Button label="Sair da conta" variant="ghost" onPress={handleLogout} size="sm" />
       </View>
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  safe:           { flex: 1, backgroundColor: '#0F0E17' },
+  container:      { flex: 1, paddingHorizontal: 24, justifyContent: 'center', gap: 24 },
+  brand:          { alignItems: 'center', gap: 10 },
+  logoBox:        { width: 72, height: 72, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  logoEmoji:      { fontSize: 32 },
+  title:          { fontSize: 26, fontFamily: 'Inter_900Black', color: '#F0EEF8', textAlign: 'center' },
+  subtitle:       { fontSize: 14, color: '#9B97B2', textAlign: 'center', lineHeight: 22, fontFamily: 'Inter_400Regular' },
+  card:           { backgroundColor: '#1A1827', borderRadius: 20, padding: 20, gap: 16, borderWidth: 1, borderColor: '#2D2A3E' },
+  cardHeader:     { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardIconRose:   { width: 44, height: 44, backgroundColor: '#2D1624', borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  cardIconViolet: { width: 44, height: 44, backgroundColor: '#1E1535', borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  cardTitle:      { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#F0EEF8' },
+  cardSubtitle:   { fontSize: 12, color: '#9B97B2', fontFamily: 'Inter_400Regular', marginTop: 2 },
+  divider:        { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  dividerLine:    { flex: 1, height: 1, backgroundColor: '#2D2A3E' },
+  dividerText:    { fontSize: 12, fontFamily: 'Inter_700Bold', color: '#544F68' },
+})

@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 
 interface BadgeProps {
   label: string
@@ -6,14 +6,24 @@ interface BadgeProps {
   emoji?: string
 }
 
-export function Badge({ label, color = '#7c3aed', emoji }: BadgeProps) {
+export function Badge({ label, color = '#FF4D8D', emoji }: BadgeProps) {
   return (
-    <View
-      className="flex-row items-center gap-1 rounded-full px-2.5 py-1"
-      style={{ backgroundColor: color + '22' }}
-    >
-      {emoji && <Text className="text-xs">{emoji}</Text>}
-      <Text className="text-xs font-semibold" style={{ color }}>{label}</Text>
+    <View style={[styles.container, { backgroundColor: color + '25' }]}>
+      {emoji && <Text style={styles.emoji}>{emoji}</Text>}
+      <Text style={[styles.label, { color }]}>{label}</Text>
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  emoji:   { fontSize: 11 },
+  label:   { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
+})

@@ -76,10 +76,10 @@ export default function RootLayout() {
   if (!fontsLoaded) return null
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#0F0E17' }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+          <Stack screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: '#0F0E17' } }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(app)" />

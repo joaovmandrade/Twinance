@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native'
+import { View, Text, ScrollView, Pressable, Alert, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { LinearGradient } from 'expo-linear-gradient'
 import { Link, router } from 'expo-router'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -51,27 +52,30 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-1 px-6 justify-center gap-8">
-          {/* Header */}
-          <View className="items-center gap-2">
-            <View className="w-16 h-16 bg-primary-600 rounded-3xl items-center justify-center mb-2">
-              <Text className="text-3xl">💜</Text>
-            </View>
-            <Text className="text-4xl font-black text-gray-900">Twinance</Text>
-            <Text className="text-base text-gray-500 text-center">
-              Controle financeiro para casais
-            </Text>
+        <View style={styles.container}>
+          {/* Brand */}
+          <View style={styles.brand}>
+            <LinearGradient
+              colors={['#FF4D8D', '#9B6CFF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.logoBox}
+            >
+              <Text style={styles.logoEmoji}>💑</Text>
+            </LinearGradient>
+            <Text style={styles.appName}>Twinance</Text>
+            <Text style={styles.tagline}>Finanças a dois, no mesmo ritmo</Text>
           </View>
 
           {/* Form */}
-          <View className="gap-4">
-            <Text className="text-2xl font-bold text-gray-900">Entrar</Text>
+          <View style={styles.form}>
+            <Text style={styles.formTitle}>Entrar</Text>
 
             <Controller
               control={control}
@@ -86,7 +90,7 @@ export default function LoginScreen() {
                   autoCapitalize="none"
                   autoComplete="email"
                   error={errors.email?.message}
-                  leftIcon={<Mail size={18} color={colors.gray[400]} />}
+                  leftIcon={<Mail size={18} color={colors.muted} />}
                 />
               )}
             />
@@ -103,7 +107,7 @@ export default function LoginScreen() {
                   secureTextEntry
                   autoComplete="password"
                   error={errors.password?.message}
-                  leftIcon={<Lock size={18} color={colors.gray[400]} />}
+                  leftIcon={<Lock size={18} color={colors.muted} />}
                 />
               )}
             />
@@ -118,11 +122,11 @@ export default function LoginScreen() {
           </View>
 
           {/* Footer */}
-          <View className="flex-row justify-center gap-1">
-            <Text className="text-sm text-gray-500">Não tem conta?</Text>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Não tem conta?</Text>
             <Link href="/(auth)/register" asChild>
               <Pressable>
-                <Text className="text-sm font-bold text-primary-600">Criar conta</Text>
+                <Text style={styles.footerLink}>Criar conta</Text>
               </Pressable>
             </Link>
           </View>
@@ -131,3 +135,19 @@ export default function LoginScreen() {
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  safe:      { flex: 1, backgroundColor: '#0F0E17' },
+  scroll:    { flexGrow: 1 },
+  container: { flex: 1, paddingHorizontal: 24, justifyContent: 'center', gap: 40 },
+  brand:     { alignItems: 'center', gap: 10 },
+  logoBox:   { width: 72, height: 72, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  logoEmoji: { fontSize: 32 },
+  appName:   { fontSize: 34, fontFamily: 'Inter_900Black', color: '#F0EEF8', letterSpacing: -0.5 },
+  tagline:   { fontSize: 14, fontFamily: 'Inter_400Regular', color: '#9B97B2', textAlign: 'center' },
+  form:      { gap: 16 },
+  formTitle: { fontSize: 24, fontFamily: 'Inter_700Bold', color: '#F0EEF8', marginBottom: 4 },
+  footer:    { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  footerText: { fontSize: 14, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  footerLink: { fontSize: 14, fontFamily: 'Inter_700Bold', color: '#FF4D8D' },
+})

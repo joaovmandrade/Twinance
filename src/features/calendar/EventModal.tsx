@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useMemo, useEffect } from 'react'
 import {
   View, Text, Switch, TextInput, Pressable,
-  KeyboardAvoidingView, Platform, ScrollView, StyleSheet,
+  Platform, ScrollView, StyleSheet,
 } from 'react-native'
 import BottomSheet, { BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import type { BottomSheetBackdropProps } from '@gorhom/bottom-sheet'
@@ -27,7 +27,7 @@ const schema = z.object({
   endTime:         z.string().default(''),
   allDay:          z.boolean().default(false),
   location:        z.string().max(100).default(''),
-  color:           z.string().default('#8b5cf6'),
+  color:           z.string().default('#FF4D8D'),
   amount:          z.string().default(''),
   isRecurring:     z.boolean().default(false),
   reminderMinutes: z.number().nullable().default(null),
@@ -47,7 +47,7 @@ interface EventModalProps {
 export const EventModal = forwardRef<BottomSheet, EventModalProps>(
   ({ event, defaultDate, onSuccess, onClose }, ref) => {
     const snapPoints = useMemo(() => ['95%'], [])
-    const { mutateAsync: addEvent, isPending: isAdding } = useAddEvent()
+    const { mutateAsync: addEvent,    isPending: isAdding   } = useAddEvent()
     const { mutateAsync: updateEvent, isPending: isUpdating } = useUpdateEvent()
     const isPending = isAdding || isUpdating
     const isEdit = Boolean(event)
@@ -64,7 +64,7 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
         endTime: '',
         allDay: false,
         location: '',
-        color: '#8b5cf6',
+        color: '#FF4D8D',
         amount: '',
         isRecurring: false,
         reminderMinutes: null,
@@ -75,12 +75,6 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
     const type     = watch('type')
     const selColor = watch('color')
 
-    // Sync default color when type changes
-    useEffect(() => {
-      // Only auto-set color when no event is being edited
-    }, [type])
-
-    // Populate form when editing
     useEffect(() => {
       if (event) {
         reset({
@@ -109,7 +103,7 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
           endTime: '',
           allDay: false,
           location: '',
-          color: '#8b5cf6',
+          color: '#FF4D8D',
           amount: '',
           isRecurring: false,
           reminderMinutes: null,
@@ -119,7 +113,7 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
 
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
+        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.7} />
       ),
       [],
     )
@@ -147,39 +141,36 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
         snapPoints={snapPoints}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: '#fff', borderRadius: 28 }}
-        handleIndicatorStyle={{ backgroundColor: colors.gray[300], width: 40 }}
+        backgroundStyle={styles.sheetBg}
+        handleIndicatorStyle={styles.handle}
         keyboardBehavior={Platform.OS === 'ios' ? 'extend' : 'interactive'}
         keyboardBlurBehavior="restore"
       >
         <BottomSheetScrollView
-          contentContainerStyle={{ padding: 24, gap: 20, paddingBottom: 60 }}
+          contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View className="flex-row items-center justify-between">
-            <Text className="text-xl font-black text-gray-900">
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetTitle}>
               {isEdit ? 'Editar Evento' : 'Novo Evento'}
             </Text>
-            <Pressable
-              onPress={handleClose}
-              className="w-9 h-9 rounded-full bg-gray-100 items-center justify-center active:bg-gray-200"
-            >
-              <X size={18} color={colors.gray[600]} />
+            <Pressable onPress={handleClose} style={styles.closeBtn}>
+              <X size={18} color={colors.muted} />
             </Pressable>
           </View>
 
           {/* Type selector */}
-          <View className="gap-2">
-            <Text className="text-sm font-semibold text-gray-700">Tipo de evento</Text>
+          <View style={{ gap: 8 }}>
+            <Text style={styles.fieldLabel}>Tipo de evento</Text>
             <Controller
               control={control}
               name="type"
               render={({ field: { onChange, value } }) => (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View className="flex-row gap-2">
+                  <View style={styles.typeRow}>
                     {EVENT_TYPES.map((t) => {
-                      const meta = EVENT_TYPE_META[t]
+                      const meta   = EVENT_TYPE_META[t]
                       const active = value === t
                       return (
                         <Pressable
@@ -188,18 +179,13 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
                             Haptics.selectionAsync()
                             onChange(t)
                           }}
-                          className="flex-row items-center gap-1.5 px-3 py-2 rounded-full"
-                          style={{
-                            backgroundColor: active ? meta.color : meta.color + '15',
-                            borderWidth: active ? 0 : 1,
-                            borderColor: meta.color + '40',
-                          }}
+                          style={[
+                            styles.typeChip,
+                            { backgroundColor: active ? meta.color : meta.color + '18', borderColor: active ? meta.color : meta.color + '40' },
+                          ]}
                         >
                           <Text style={{ fontSize: 14 }}>{meta.emoji}</Text>
-                          <Text
-                            className="text-xs font-bold"
-                            style={{ color: active ? '#fff' : meta.color }}
-                          >
+                          <Text style={[styles.typeChipText, { color: active ? '#fff' : meta.color }]}>
                             {meta.label}
                           </Text>
                         </Pressable>
@@ -211,7 +197,6 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
             />
           </View>
 
-          {/* Title */}
           <Controller
             control={control}
             name="title"
@@ -226,31 +211,29 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
             )}
           />
 
-          {/* All day toggle */}
           <Controller
             control={control}
             name="allDay"
             render={({ field: { onChange, value } }) => (
-              <View className="flex-row items-center justify-between bg-gray-50 rounded-2xl px-4 py-3">
+              <View style={styles.toggleRow}>
                 <View>
-                  <Text className="text-sm font-semibold text-gray-800">Dia todo</Text>
-                  <Text className="text-xs text-gray-400">Sem horário definido</Text>
+                  <Text style={styles.toggleLabel}>Dia todo</Text>
+                  <Text style={styles.toggleSub}>Sem horário definido</Text>
                 </View>
                 <Switch
                   value={value}
                   onValueChange={onChange}
-                  trackColor={{ false: colors.gray[200], true: colors.primary[500] }}
-                  thumbColor={colors.white}
+                  trackColor={{ false: colors.rim, true: colors.primary[500] }}
+                  thumbColor={colors.onDark}
                 />
               </View>
             )}
           />
 
-          {/* Date & Time */}
-          <View className="gap-3">
-            <Text className="text-sm font-semibold text-gray-700">Data</Text>
-            <View className="flex-row gap-3">
-              <View className="flex-1">
+          <View style={{ gap: 12 }}>
+            <Text style={styles.fieldLabel}>Data</Text>
+            <View style={styles.dateRow}>
+              <View style={{ flex: 1 }}>
                 <Controller
                   control={control}
                   name="startDate"
@@ -285,9 +268,8 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
               )}
             </View>
 
-            {/* End date (optional) */}
-            <View className="flex-row gap-3">
-              <View className="flex-1">
+            <View style={styles.dateRow}>
+              <View style={{ flex: 1 }}>
                 <Controller
                   control={control}
                   name="endDate"
@@ -322,7 +304,6 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
             </View>
           </View>
 
-          {/* Amount (for bills/goals) */}
           {(type === 'bill' || type === 'goal') && (
             <Controller
               control={control}
@@ -339,7 +320,6 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
             />
           )}
 
-          {/* Location */}
           <Controller
             control={control}
             name="location"
@@ -353,9 +333,8 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
             )}
           />
 
-          {/* Description */}
-          <View className="gap-1.5">
-            <Text className="text-sm font-semibold text-gray-700">Descrição (opcional)</Text>
+          <View style={{ gap: 8 }}>
+            <Text style={styles.fieldLabel}>Descrição (opcional)</Text>
             <Controller
               control={control}
               name="description"
@@ -364,26 +343,22 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
                   value={value}
                   onChangeText={onChange}
                   placeholder="Adicione detalhes..."
-                  placeholderTextColor={colors.gray[400]}
+                  placeholderTextColor={colors.muted}
                   multiline
                   numberOfLines={3}
-                  style={[
-                    styles.textarea,
-                    { color: colors.gray[800], backgroundColor: colors.gray[50] },
-                  ]}
+                  style={styles.textarea}
                 />
               )}
             />
           </View>
 
-          {/* Color picker */}
-          <View className="gap-2">
-            <Text className="text-sm font-semibold text-gray-700">Cor do evento</Text>
+          <View style={{ gap: 10 }}>
+            <Text style={styles.fieldLabel}>Cor do evento</Text>
             <Controller
               control={control}
               name="color"
               render={({ field: { onChange, value } }) => (
-                <View className="flex-row gap-3 flex-wrap">
+                <View style={styles.colorsRow}>
                   {EVENT_COLORS.map((c) => (
                     <Pressable
                       key={c}
@@ -391,19 +366,11 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
                         Haptics.selectionAsync()
                         onChange(c)
                       }}
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 16,
-                        backgroundColor: c,
-                        borderWidth: value === c ? 3 : 0,
-                        borderColor: '#fff',
-                        elevation: value === c ? 4 : 1,
-                        shadowColor: c,
-                        shadowOpacity: value === c ? 0.5 : 0.2,
-                        shadowRadius: value === c ? 6 : 3,
-                        shadowOffset: { width: 0, height: 2 },
-                      }}
+                      style={[
+                        styles.colorDot,
+                        { backgroundColor: c },
+                        value === c && { borderWidth: 3, borderColor: colors.onDark },
+                      ]}
                     />
                   ))}
                 </View>
@@ -411,35 +378,33 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
             />
           </View>
 
-          {/* Recurring */}
           <Controller
             control={control}
             name="isRecurring"
             render={({ field: { onChange, value } }) => (
-              <View className="flex-row items-center justify-between bg-gray-50 rounded-2xl px-4 py-3">
+              <View style={styles.toggleRow}>
                 <View>
-                  <Text className="text-sm font-semibold text-gray-800">Recorrente</Text>
-                  <Text className="text-xs text-gray-400">Repete mensalmente</Text>
+                  <Text style={styles.toggleLabel}>Recorrente</Text>
+                  <Text style={styles.toggleSub}>Repete mensalmente</Text>
                 </View>
                 <Switch
                   value={value}
                   onValueChange={onChange}
-                  trackColor={{ false: colors.gray[200], true: colors.primary[500] }}
-                  thumbColor={colors.white}
+                  trackColor={{ false: colors.rim, true: colors.primary[500] }}
+                  thumbColor={colors.onDark}
                 />
               </View>
             )}
           />
 
-          {/* Reminder */}
-          <View className="gap-2">
-            <Text className="text-sm font-semibold text-gray-700">Lembrete</Text>
+          <View style={{ gap: 8 }}>
+            <Text style={styles.fieldLabel}>Lembrete</Text>
             <Controller
               control={control}
               name="reminderMinutes"
               render={({ field: { onChange, value } }) => (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View className="flex-row gap-2">
+                  <View style={styles.remindersRow}>
                     {REMINDER_OPTIONS.map((opt) => {
                       const active = value === opt.value
                       return (
@@ -449,15 +414,12 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
                             Haptics.selectionAsync()
                             onChange(active ? null : opt.value)
                           }}
-                          className="px-3 py-2 rounded-full"
-                          style={{
-                            backgroundColor: active ? colors.primary[600] : colors.gray[100],
-                          }}
+                          style={[
+                            styles.reminderChip,
+                            { backgroundColor: active ? colors.primary[500] : colors.elevated },
+                          ]}
                         >
-                          <Text
-                            className="text-xs font-semibold"
-                            style={{ color: active ? '#fff' : colors.gray[600] }}
-                          >
+                          <Text style={[styles.reminderText, { color: active ? '#fff' : colors.muted }]}>
                             {opt.label}
                           </Text>
                         </Pressable>
@@ -485,13 +447,24 @@ export const EventModal = forwardRef<BottomSheet, EventModalProps>(
 EventModal.displayName = 'EventModal'
 
 const styles = StyleSheet.create({
-  textarea: {
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
+  sheetBg:       { backgroundColor: '#1A1827', borderRadius: 28 },
+  handle:        { backgroundColor: '#544F68', width: 40 },
+  content:       { padding: 24, gap: 20, paddingBottom: 60 },
+  sheetHeader:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  sheetTitle:    { fontSize: 20, fontFamily: 'Inter_900Black', color: '#F0EEF8' },
+  closeBtn:      { width: 36, height: 36, borderRadius: 18, backgroundColor: '#221F32', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#2D2A3E' },
+  fieldLabel:    { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#B8B4CC' },
+  typeRow:       { flexDirection: 'row', gap: 8 },
+  typeChip:      { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, borderWidth: 1 },
+  typeChipText:  { fontSize: 12, fontFamily: 'Inter_700Bold' },
+  toggleRow:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#221F32', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#2D2A3E' },
+  toggleLabel:   { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#F0EEF8' },
+  toggleSub:     { fontSize: 11, color: '#9B97B2', fontFamily: 'Inter_400Regular', marginTop: 2 },
+  dateRow:       { flexDirection: 'row', gap: 12 },
+  textarea:      { borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, fontFamily: 'Inter_400Regular', minHeight: 80, textAlignVertical: 'top', backgroundColor: '#221F32', color: '#F0EEF8', borderWidth: 1, borderColor: '#2D2A3E' },
+  colorsRow:     { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  colorDot:      { width: 32, height: 32, borderRadius: 16 },
+  remindersRow:  { flexDirection: 'row', gap: 8 },
+  reminderChip:  { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
+  reminderText:  { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
 })

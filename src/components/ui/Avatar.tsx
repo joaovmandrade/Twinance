@@ -1,43 +1,66 @@
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, StyleSheet } from 'react-native'
 import { getInitials } from '@/utils/format'
-import { colors } from '@/theme'
 
-type Size = 'sm' | 'md' | 'lg' | 'xl'
+type Size    = 'sm' | 'md' | 'lg' | 'xl'
+type Variant = 'you' | 'partner' | 'default'
 
 interface AvatarProps {
   name: string
   uri?: string
   size?: Size
+  variant?: Variant
 }
 
-const sizeMap: Record<Size, { container: number; text: string }> = {
-  sm: { container: 32, text: 'text-xs' },
-  md: { container: 40, text: 'text-sm' },
-  lg: { container: 48, text: 'text-base' },
-  xl: { container: 64, text: 'text-xl' },
+const sizeMap: Record<Size, number> = {
+  sm: 32,
+  md: 40,
+  lg: 48,
+  xl: 64,
 }
 
-export function Avatar({ name, uri, size = 'md' }: AvatarProps) {
-  const { container, text } = sizeMap[size]
+const fontSizeMap: Record<Size, number> = {
+  sm: 11,
+  md: 13,
+  lg: 15,
+  xl: 20,
+}
+
+const variantColors: Record<Variant, { bg: string; text: string }> = {
+  you:     { bg: '#2D1624', text: '#FF4D8D' },
+  partner: { bg: '#1E1535', text: '#9B6CFF' },
+  default: { bg: '#2D1624', text: '#FF4D8D' },
+}
+
+export function Avatar({ name, uri, size = 'md', variant = 'default' }: AvatarProps) {
+  const dim      = sizeMap[size]
+  const fSize    = fontSizeMap[size]
+  const { bg, text } = variantColors[variant]
   const initials = getInitials(name)
 
   return (
     <View
-      style={{
-        width: container,
-        height: container,
-        borderRadius: container / 2,
-        backgroundColor: colors.primary[100],
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-      }}
+      style={[
+        styles.base,
+        { width: dim, height: dim, borderRadius: dim / 2, backgroundColor: bg },
+      ]}
     >
       {uri ? (
-        <Image source={{ uri }} style={{ width: container, height: container }} />
+        <Image source={{ uri }} style={{ width: dim, height: dim }} />
       ) : (
-        <Text className={['font-bold text-primary-700', text].join(' ')}>{initials}</Text>
+        <Text style={{ fontSize: fSize, fontFamily: 'Inter_700Bold', color: text }}>
+          {initials}
+        </Text>
       )}
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  base: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#2D2A3E',
+  },
+})

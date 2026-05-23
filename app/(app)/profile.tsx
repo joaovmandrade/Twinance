@@ -1,5 +1,6 @@
-import { View, Text, Pressable, Alert, ScrollView } from 'react-native'
+import { View, Text, Pressable, Alert, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import * as Clipboard from 'expo-clipboard'
 import * as Haptics from 'expo-haptics'
@@ -11,7 +12,7 @@ import { logout } from '@/services/authService'
 import { getTotalByUser } from '@/services/expenseService'
 import { formatCurrency } from '@/utils/format'
 import { Avatar, Card } from '@/components/ui'
-import { colors, shadows } from '@/theme'
+import { colors } from '@/theme'
 
 export default function ProfileScreen() {
   const user    = useAuthStore((s) => s.user)
@@ -50,33 +51,37 @@ export default function ProfileScreen() {
   if (!user) return null
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
-        contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}
+        contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-2xl text-gray-900 mb-2" style={{ fontFamily: 'Inter_900Black' }}>
-          Perfil
-        </Text>
+        <Text style={styles.pageTitle}>Perfil</Text>
 
         {/* Profile card */}
         <Card padding="lg">
-          <View className="items-center gap-3">
-            <Avatar name={user.name} size="xl" />
-            <View className="items-center">
-              <Text className="text-xl font-bold text-gray-900">{user.name}</Text>
-              <Text className="text-sm text-gray-500">{user.email}</Text>
-            </View>
+          <View style={styles.profileCenter}>
+            <LinearGradient
+              colors={['#FF4D8D22', '#9B6CFF22']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.avatarRing}
+            >
+              <Avatar name={user.name} size="xl" variant="you" />
+            </LinearGradient>
+            <Text style={styles.profileName}>{user.name}</Text>
+            <Text style={styles.profileEmail}>{user.email}</Text>
           </View>
 
-          <View className="flex-row gap-4 mt-5">
-            <View className="flex-1 bg-gray-50 rounded-2xl p-3 items-center gap-1">
-              <Text className="text-xl font-black text-primary-600">{formatCurrency(myTotal)}</Text>
-              <Text className="text-xs text-gray-500">Total gasto</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>{formatCurrency(myTotal)}</Text>
+              <Text style={styles.statLabel}>Total gasto</Text>
             </View>
-            <View className="flex-1 bg-gray-50 rounded-2xl p-3 items-center gap-1">
-              <Text className="text-xl font-black text-primary-600">{myCount}</Text>
-              <Text className="text-xs text-gray-500">Transações</Text>
+            <View style={styles.statDivider} />
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>{myCount}</Text>
+              <Text style={styles.statLabel}>Transações</Text>
             </View>
           </View>
         </Card>
@@ -84,42 +89,37 @@ export default function ProfileScreen() {
         {/* Couple card */}
         {couple && (
           <Card padding="lg">
-            <View className="flex-row items-center gap-3 mb-4">
-              <View className="w-10 h-10 bg-primary-100 rounded-2xl items-center justify-center">
-                <Users size={20} color={colors.primary[600]} />
+            <View style={styles.coupleCardHeader}>
+              <View style={styles.coupleIconBox}>
+                <Users size={20} color={colors.primary[500]} />
               </View>
-              <Text className="text-base font-bold text-gray-900">Casal</Text>
+              <Text style={styles.coupleCardTitle}>Casal</Text>
             </View>
 
             {/* Invite code */}
-            <View className="flex-row items-center justify-between bg-gray-50 rounded-2xl px-4 py-3 mb-3">
+            <View style={styles.inviteRow}>
               <View>
-                <Text className="text-xs text-gray-500">Código de convite</Text>
-                <Text className="text-base font-black text-primary-700 tracking-widest">
-                  {couple.inviteCode}
-                </Text>
+                <Text style={styles.inviteCodeLabel}>Código de convite</Text>
+                <Text style={styles.inviteCode}>{couple.inviteCode}</Text>
               </View>
-              <Pressable
-                onPress={copyCode}
-                className="w-9 h-9 bg-primary-100 rounded-xl items-center justify-center"
-              >
-                <Copy size={16} color={colors.primary[600]} />
+              <Pressable onPress={copyCode} style={styles.copyBtn}>
+                <Copy size={16} color={colors.primary[500]} />
               </Pressable>
             </View>
 
             {/* Partner */}
             {partner ? (
-              <View className="flex-row items-center gap-3 bg-violet-50 rounded-2xl px-4 py-3">
-                <Avatar name={partner.name} size="md" />
-                <View className="flex-1">
-                  <Text className="text-sm font-semibold text-gray-900">{partner.name}</Text>
-                  <Text className="text-xs text-gray-500">{partner.email}</Text>
+              <View style={styles.partnerRow}>
+                <Avatar name={partner.name} size="md" variant="partner" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.partnerName}>{partner.name}</Text>
+                  <Text style={styles.partnerEmail}>{partner.email}</Text>
                 </View>
-                <Text className="text-xs text-primary-600 font-semibold">Parceiro(a)</Text>
+                <Text style={styles.partnerTag}>Parceiro(a)</Text>
               </View>
             ) : (
-              <View className="bg-gray-50 rounded-2xl px-4 py-3">
-                <Text className="text-sm text-gray-400 text-center">
+              <View style={styles.waitingRow}>
+                <Text style={styles.waitingText}>
                   Aguardando parceiro entrar com o código acima
                 </Text>
               </View>
@@ -128,18 +128,45 @@ export default function ProfileScreen() {
         )}
 
         {/* Logout */}
-        <Pressable
-          onPress={handleLogout}
-          className="flex-row items-center gap-3 bg-white rounded-2xl px-5 py-4 active:bg-gray-50"
-          style={shadows.sm}
-        >
-          <View className="w-9 h-9 bg-red-50 rounded-xl items-center justify-center">
-            <LogOut size={18} color="#ef4444" />
+        <Pressable onPress={handleLogout} style={styles.logoutBtn}>
+          <View style={styles.logoutIcon}>
+            <LogOut size={18} color={colors.error} />
           </View>
-          <Text className="flex-1 text-sm font-semibold text-gray-800">Sair da conta</Text>
-          <ChevronRight size={16} color={colors.gray[400]} />
+          <Text style={styles.logoutText}>Sair da conta</Text>
+          <ChevronRight size={16} color={colors.muted} />
         </Pressable>
       </ScrollView>
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  safe:            { flex: 1, backgroundColor: '#0F0E17' },
+  scroll:          { padding: 20, gap: 16, paddingBottom: 40 },
+  pageTitle:       { fontSize: 26, fontFamily: 'Inter_900Black', color: '#F0EEF8', marginBottom: 4 },
+  profileCenter:   { alignItems: 'center', gap: 8 },
+  avatarRing:      { padding: 3, borderRadius: 40, marginBottom: 4 },
+  profileName:     { fontSize: 20, fontFamily: 'Inter_700Bold', color: '#F0EEF8' },
+  profileEmail:    { fontSize: 13, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  statsRow:        { flexDirection: 'row', marginTop: 20 },
+  statBox:         { flex: 1, alignItems: 'center', gap: 4 },
+  statDivider:     { width: 1, backgroundColor: '#2D2A3E' },
+  statValue:       { fontSize: 20, fontFamily: 'Inter_900Black', color: '#FF4D8D' },
+  statLabel:       { fontSize: 11, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  coupleCardHeader:{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
+  coupleIconBox:   { width: 40, height: 40, backgroundColor: '#2D1624', borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  coupleCardTitle: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#F0EEF8' },
+  inviteRow:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#221F32', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 12, borderWidth: 1, borderColor: '#2D2A3E' },
+  inviteCodeLabel: { fontSize: 11, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  inviteCode:      { fontSize: 18, fontFamily: 'Inter_900Black', color: '#FF4D8D', letterSpacing: 3, marginTop: 2 },
+  copyBtn:         { width: 36, height: 36, backgroundColor: '#2D1624', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  partnerRow:      { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#1E1535', borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: '#3D2E6B' },
+  partnerName:     { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#F0EEF8' },
+  partnerEmail:    { fontSize: 11, color: '#9B97B2', fontFamily: 'Inter_400Regular' },
+  partnerTag:      { fontSize: 11, color: '#9B6CFF', fontFamily: 'Inter_600SemiBold' },
+  waitingRow:      { backgroundColor: '#221F32', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: '#2D2A3E', borderStyle: 'dashed' },
+  waitingText:     { fontSize: 13, color: '#9B97B2', textAlign: 'center', fontFamily: 'Inter_400Regular' },
+  logoutBtn:       { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#1A1827', borderRadius: 16, paddingHorizontal: 20, paddingVertical: 16, borderWidth: 1, borderColor: '#2D2A3E' },
+  logoutIcon:      { width: 36, height: 36, backgroundColor: '#FF517022', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  logoutText:      { flex: 1, fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#F0EEF8' },
+})

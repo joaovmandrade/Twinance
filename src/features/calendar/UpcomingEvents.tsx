@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import { Calendar } from 'lucide-react-native'
 import { format, parseISO, isToday, isTomorrow, isThisWeek } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -21,9 +21,7 @@ function getDayLabel(dateStr: string): string {
     if (isThisWeek(d, { weekStartsOn: 0 }))
       return format(d, "EEEE", { locale: ptBR })
     return format(d, "d 'de' MMMM", { locale: ptBR })
-  } catch {
-    return dateStr
-  }
+  } catch { return dateStr }
 }
 
 function groupByDay(events: CalendarEvent[]): Map<string, CalendarEvent[]> {
@@ -40,12 +38,12 @@ function groupByDay(events: CalendarEvent[]): Map<string, CalendarEvent[]> {
 export function UpcomingEvents({ events, onEventPress, onEventLongPress }: UpcomingEventsProps) {
   if (events.length === 0) {
     return (
-      <View className="items-center py-8 gap-3">
-        <View className="w-14 h-14 rounded-full bg-gray-100 items-center justify-center">
-          <Calendar size={26} color={colors.gray[400]} />
+      <View style={styles.empty}>
+        <View style={styles.emptyIcon}>
+          <Calendar size={26} color={colors.muted} />
         </View>
-        <Text className="text-sm font-semibold text-gray-400">Nenhum evento próximo</Text>
-        <Text className="text-xs text-gray-300 text-center px-8">
+        <Text style={styles.emptyTitle}>Nenhum evento próximo</Text>
+        <Text style={styles.emptySubtitle}>
           Toque em + para adicionar seu primeiro evento compartilhado
         </Text>
       </View>
@@ -55,17 +53,16 @@ export function UpcomingEvents({ events, onEventPress, onEventLongPress }: Upcom
   const groups = groupByDay(events)
 
   return (
-    <View className="gap-4">
+    <View style={{ gap: 20 }}>
       {Array.from(groups.entries()).map(([dayKey, dayEvents]) => (
-        <View key={dayKey} className="gap-2">
-          <View className="flex-row items-center gap-2">
-            <View className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-            <Text className="text-xs font-bold text-gray-500 capitalize">
+        <View key={dayKey} style={{ gap: 8 }}>
+          <View style={styles.dayLabelRow}>
+            <View style={styles.dayDot} />
+            <Text style={styles.dayLabel}>
               {getDayLabel(dayKey + 'T00:00:00.000Z')}
             </Text>
           </View>
-
-          <View className="gap-2">
+          <View style={{ gap: 8 }}>
             {dayEvents.map((event) => (
               <EventCard
                 key={event.id}
@@ -83,19 +80,28 @@ export function UpcomingEvents({ events, onEventPress, onEventLongPress }: Upcom
 
 export function EventTypeLegend() {
   return (
-    <View className="flex-row flex-wrap gap-2">
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
       {Object.entries(EVENT_TYPE_META).map(([type, meta]) => (
         <View
           key={type}
-          className="flex-row items-center gap-1.5 px-2.5 py-1 rounded-full"
-          style={{ backgroundColor: meta.color + '18' }}
+          style={[styles.legend, { backgroundColor: meta.color + '18' }]}
         >
           <Text style={{ fontSize: 11 }}>{meta.emoji}</Text>
-          <Text className="text-xs font-semibold" style={{ color: meta.color }}>
-            {meta.label}
-          </Text>
+          <Text style={[styles.legendText, { color: meta.color }]}>{meta.label}</Text>
         </View>
       ))}
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  empty:       { alignItems: 'center', paddingVertical: 32, gap: 10 },
+  emptyIcon:   { width: 56, height: 56, borderRadius: 28, backgroundColor: '#221F32', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#2D2A3E' },
+  emptyTitle:  { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#9B97B2' },
+  emptySubtitle: { fontSize: 12, color: '#544F68', fontFamily: 'Inter_400Regular', textAlign: 'center', paddingHorizontal: 32 },
+  dayLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dayDot:      { width: 6, height: 6, borderRadius: 3, backgroundColor: '#FF4D8D' },
+  dayLabel:    { fontSize: 12, fontFamily: 'Inter_700Bold', color: '#9B97B2', textTransform: 'capitalize' },
+  legend:      { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  legendText:  { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
+})

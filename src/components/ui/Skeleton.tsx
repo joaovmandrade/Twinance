@@ -14,13 +14,13 @@ export function Skeleton({
   borderRadius = 10,
   style,
 }: SkeletonProps) {
-  const opacity = useRef(new Animated.Value(0.35)).current
+  const opacity = useRef(new Animated.Value(0.25)).current
 
   useEffect(() => {
     const anim = Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 750, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.35, duration: 750, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.6, duration: 750, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.25, duration: 750, useNativeDriver: true }),
       ]),
     )
     anim.start()
@@ -29,7 +29,7 @@ export function Skeleton({
 
   return (
     <Animated.View
-      style={[{ width, height, borderRadius, backgroundColor: '#e5e7eb', opacity }, style]}
+      style={[{ width, height, borderRadius, backgroundColor: '#2D2A3E', opacity }, style]}
     />
   )
 }
